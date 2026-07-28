@@ -1,0 +1,35 @@
+name: smoke
+
+# Lightweight CI gate: byte-compile all sources and import the app
+# (serve() is guarded by __main__, so importing does not start the server).
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Byte-compile all sources (syntax check)
+        run: python -m compileall -q app.py components.py utils content
+
+      - name: Import smoke test (routes register, no server start)
+        env:
+          OPENROUTER_API_KEY: dummy
+          OPENAI_API_KEY: dummy
+        run: python -c "import app; print('import app OK - routes registered')"

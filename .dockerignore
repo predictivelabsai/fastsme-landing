@@ -1,0 +1,8 @@
+.venv
+.git
+.gitignore
+.sesskey
+__pycache__
+*.pyc
+LICENSE
+README.md

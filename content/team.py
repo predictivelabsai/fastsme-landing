@@ -1,0 +1,51 @@
+TEAM = [
+    {
+        "name": "Kamel Belkadhi",
+        "role": "Director of Engineering",
+        "bio": "Data engineer and entrepreneur. Former Senior Data Engineer at DSM, ex-McKinsey Data Engineering. Background in AI, data pipelines, and platform engineering across enterprise and startup environments.",
+        "linkedin": "https://www.linkedin.com/in/kamel-belkadhi-167b85265/",
+        "initials": "KB",
+    },
+    {
+        "name": "Julian Kaljuvee",
+        "role": "Director & AI Engineer",
+        "bio": "BSc Applied Maths (Harvard), MSc Statistics (Columbia). Former Goldman Sachs, Morgan Stanley, UBS, JPMorgan. Delivered AI programmes inside Microsoft's Industry Solutions Delivery group. Co-founder of Bondora, EstateGuru, Investly.",
+        "linkedin": "https://www.linkedin.com/in/juliankaljuvee/",
+        "initials": "JK",
+    },
+    {
+        "name": "Raslen Guesmi",
+        "role": "Data Scientist / Machine Learning Engineer",
+        "bio": "Applied ML across document intelligence, forecasting, and structured extraction.",
+        "linkedin": "https://www.linkedin.com/in/raslen-guesmi/",
+        "initials": "RG",
+    },
+    {
+        "name": "Siwei Feng",
+        "role": "AI Engineer / Data Scientist",
+        "bio": "Agentic systems, retrieval pipelines, and production LLM deployment.",
+        "linkedin": "https://www.linkedin.com/in/siwei-feng-28488a398/",
+        "initials": "SF",
+    },
+    {
+        "name": "Richard Henry Lao",
+        "role": "AI Engineer & Director",
+        "bio": "Data analysis and inference engineering. Economist and data scientist — BSc Economics with a Data Science minor and MSc Economics & Data Science, Tilburg University. AI Software Developer at Franklin | The DNA of Buildings, building AI and data-analytics systems. Based in Tallinn.",
+        "linkedin": "https://www.linkedin.com/in/richard-henry-lao-01589826b/",
+        "initials": "RL",
+    },
+    {
+        "name": "Helen Kaljuvee",
+        "role": "AI Product Manager",
+        "bio": "Product strategy for AI and machine-learning products — roadmap definition, discovery and user research, and cross-functional delivery. Translates model capabilities into shipped features, from problem framing through go-to-market.",
+        "linkedin": "https://www.linkedin.com/in/helen-kaljuvee/",
+        "initials": "HK",
+    },
+    {
+        "name": "Chenhao Xue",
+        "role": "Quantitative Research Consultant",
+        "bio": "Time-series modelling, portfolio analytics, and research tooling.",
+        "linkedin": "https://www.linkedin.com/in/chenhao-xue-68b93a1a3/",
+        "initials": "CX",
+    },
+]
