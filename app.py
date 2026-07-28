@@ -11,7 +11,7 @@ from content.products import GROUPS, PRODUCTS, FEATURED
 from content.clients import CLIENTS
 from content.team import TEAM, ADVISORY
 
-app, rt = fast_app(static_path="static")
+app, rt = fast_app(static_path=".")
 
 
 class CanonicalHostMiddleware(BaseHTTPMiddleware):

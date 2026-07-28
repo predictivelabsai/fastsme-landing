@@ -80,5 +80,7 @@ def test_mobile_navigation(server):
 def test_health_and_legacy_redirect(server):
     import urllib.request
     assert b'"status":"ok"' in urllib.request.urlopen(server + "/healthz").read()
+    assert urllib.request.urlopen(server + "/static/site.css").status == 200
+    assert urllib.request.urlopen(server + "/static/favicon.svg").status == 200
     response = urllib.request.urlopen(server + "/platform")
     assert response.url.endswith("/products")
