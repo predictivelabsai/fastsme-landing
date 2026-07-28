@@ -6,3 +6,6 @@ __pycache__
 *.pyc
 LICENSE
 README.md
+output
+screenshots
+static/video

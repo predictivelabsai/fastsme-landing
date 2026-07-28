@@ -1,93 +1,52 @@
-# Predictive Labs AI Landing Page
+# FastSME
 
-A modern, responsive landing page for Predictive Labs built with FastHTML.
+The landing site for **FastSME** — an open-source platform bringing enterprise-grade software to SMEs and SMBs globally at affordable prices.
 
-## Overview
+FastSME is operated by Exroad Fintech Ltd and the source is published at [github.com/predictivelabsai](https://github.com/predictivelabsai).
 
-This landing page showcases Predictive Labs' AI and GenAI services, expertise, case studies, and technology stack. The design features a clean, professional aesthetic with a cream and dark green color scheme.
+## Local development
 
-## Features
-
-- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
-- **FastHTML Framework**: Lightweight and fast Python-based web framework
-- **Modern UI**: Clean typography and card-based layouts
-- **Sections Include**:
-  - Hero section with company mission
-  - Our Expertise (4 key service areas)
-  - Industries We Serve (Insurance, Financial Services, Pharma/Biotech, Manufacturing)
-  - Sample Case Studies (Microsoft, ARM Holdings, Nando's, LSEG)
-  - Technology Stack
-  - Why Choose Predictive Labs
-  - Contact CTA
-
-## Technology Stack
-
-- **Framework**: FastHTML
-- **Python**: 3.11+
-- **Server**: Uvicorn
-
-## Installation
-
-1. Clone the repository:
 ```bash
-git clone https://github.com/predictivelabsai/predictivelabsai-landing.git
-cd predictivelabsai-landing
-```
-
-2. Install dependencies:
-```bash
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-```
-
-## Running Locally
-
-Start the development server:
-```bash
 python main.py
 ```
 
-The application will be available at `http://localhost:5001`
+The app listens on `http://localhost:5001` by default and honours the `PORT` environment variable.
 
-## Deployment
+## Tests
 
-### Deploy to Fly.io
-
-1. Install the Fly CLI
-2. Run `fly launch` in the project directory
-3. Follow the prompts to deploy
-
-### Deploy to Railway
-
-1. Connect your GitHub repository to Railway
-2. Railway will automatically detect the Python app and deploy
-
-### Deploy to Render
-
-1. Create a new Web Service on Render
-2. Connect your GitHub repository
-3. Set the start command to: `python main.py`
-
-## Project Structure
-
-```
-predictivelabsai-landing/
-├── main.py              # Main FastHTML application
-├── requirements.txt     # Python dependencies
-└── README.md           # This file
+```bash
+pip install pytest playwright
+python -m playwright install chromium
+python -m pytest tests/test_pages.py -v
 ```
 
-## Color Scheme
+Browser artifacts are written to `output/playwright/`.
 
-- **Cream Background**: #F5F1E8
-- **Dark Green**: #2C4A3A
-- **Text Dark**: #2D2D2D
-- **Text Light**: #666666
-- **Accent Green**: #4A7C59
+## Docker
 
-## Contact
+```bash
+docker build -t fastsme .
+docker run --rm -p 5001:5001 fastsme
+curl http://localhost:5001/healthz
+```
 
-For inquiries, reach out to: info@predictivelabs.ai
+See [DEPLOY.md](DEPLOY.md) for the Coolify and CI/CD setup.
 
-## License
+## Structure
 
-Copyright © 2026 Predictive Labs. All rights reserved.
+- `app.py` — routes, redirects and page composition
+- `components.py` — shared layout and design system
+- `content/products.py` — grouped Fast* product portfolio
+- `content/clients.py` — selected client experience
+- `content/team.py` — core team and advisory board
+- `static/` — CSS and favicon
+
+## Legal
+
+Exroad Fintech Ltd, trading as FastSME<br>
+Company number 11914994<br>
+155 Minories Street, Flat 275, London, United Kingdom, EC3N 1AD<br>
+Contact: info@fastsme.com

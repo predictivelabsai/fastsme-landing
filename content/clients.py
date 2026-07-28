@@ -1,0 +1,15 @@
+CLIENTS = [
+    ("Microsoft", "Enterprise AI", "Generative AI delivery, retrieval, evaluation and fine-tuning for global enterprise environments."),
+    ("ARM", "Forecasting", "Demand, royalty and non-royalty revenue forecasting using external and alternative data."),
+    ("Vaxart", "Bio AI", "Manufacturing optimisation and generative-AI-driven insight for biotechnology."),
+    ("WorldRemit", "Fintech operations", "Revenue forecasting, cloud migration and finance reconciliation."),
+    ("IKEA / INGKA", "Enterprise data", "Group-wide KPI data infrastructure and business-planning analytics."),
+    ("Nomad Foods", "Marketing science", "Production marketing-mix modelling for European consumer brands."),
+    ("Nando's", "Demand & data", "Sales forecasting and integration of POS, loyalty, rota, weather and delivery data."),
+    ("DBRS Morningstar", "Risk modelling", "European RMBS rating models built and deployed across very large datasets."),
+    ("London Stock Exchange Group", "Financial services", "Quantitative, data and financial-market technology experience."),
+    ("Indurent / Blackstone", "Real estate AI", "Production AI across core business and investment functions in a large property platform."),
+    ("Anglo American", "Industrial AI", "Enterprise AI work in global mining and industrial operations."),
+    ("Ternium", "Manufacturing AI", "Enterprise AI work for global steel production."),
+    ("ADNOC", "Energy AI", "Enterprise AI delivery in the energy sector."),
+]

@@ -1,913 +1,242 @@
-"""
-Predictive Labs — multipage FastHTML landing site (v2).
+"""FastSME — open enterprise software for SMEs and SMBs globally."""
 
-Dark, palantir-inspired, public-sector first. Content lives in content/*.py;
-routes are thin composition layers over components.py primitives.
-"""
-
+import os
 from starlette.requests import Request
-from starlette.responses import JSONResponse, RedirectResponse
+from starlette.responses import JSONResponse, RedirectResponse, PlainTextResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+from fasthtml.common import fast_app, serve, Div, Span, A, P, Section, Article, H3, Strong, NotStr
 
-from fasthtml.common import (
-    fast_app, serve, Div, Span, A, P, Ul, Li, Section, Article, Header,
-    NotStr, Script, Style, H1, H2, H3, Button,
-)
+from components import page, Section_, Heading, Eyebrow, Button_, ProductCard, CONTACT_EMAIL
+from content.products import GROUPS, PRODUCTS, FEATURED
+from content.clients import CLIENTS
+from content.team import TEAM, ADVISORY
 
-from components import (
-    page, Hero, Pillar, MetricTile, CaseStudyCard, CTASection, NewsSection,
-    Section_, Heading, Eyebrow, Pill, Button_, SectorLink,
-    CONTACT_EMAIL, GITHUB_URL, LINKEDIN_URL,
-)
-from content.case_studies import ALL as ALL_CASES, BID_DERIVED, NAMED_PRECEDENTS
-from content.team import TEAM
-from content.repos import REPOS, EXTERNAL_RESEARCH, APP_SUITE
-from content import signal as signal_mod
-from content import news as news_mod
-from utils.i18n import t, get_lang, set_lang
-
-# Kick off the background RSS refresher once at import time so page renders
-# never block on upstream fetches.
-news_mod.start_background_refresh()
+app, rt = fast_app(static_path="static")
 
 
-app, rt = fast_app(live=False, static_path=".", pico=False, secret_key="plai-landing-sess-2026")
+class CanonicalHostMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        host = request.headers.get("host", "").split(":")[0].lower()
+        if host in {"www.fastsme.com", "fastsme.org", "www.fastsme.org"}:
+            return RedirectResponse(f"https://fastsme.com{request.url.path}" + (f"?{request.url.query}" if request.url.query else ""), status_code=301)
+        return await call_next(request)
 
 
-def _lang(request: Request) -> str:
-    return get_lang(request.session, request)
+app.add_middleware(CanonicalHostMiddleware)
 
 
-@rt("/lang", methods=["POST"])
-async def lang_switch(request: Request):
-    form = await request.form()
-    code = (form.get("lang") or "").strip()
-    if code:
-        set_lang(request.session, code)
-    return JSONResponse({"ok": True})
+def _intro(eyebrow, title, body):
+    return Section_(
+        Eyebrow(eyebrow),
+        Heading(title, 1, "mt-5 max-w-5xl"),
+        P(body, cls="mt-7 max-w-3xl text-lg leading-8 text-muted md:text-xl"),
+        cls="pt-20 md:pt-28",
+    )
 
-
-# ---------- /  Home ----------
 
 @rt("/")
-def home(request: Request):
-    lang = _lang(request)
-    pillars = [
-        ("01", t("pillar_doc_intel", lang), t("pillar_doc_intel_body", lang)),
-        ("02", t("pillar_forecasting", lang), t("pillar_forecasting_body", lang)),
-        ("03", t("pillar_geo", lang), t("pillar_geo_body", lang)),
-        ("04", t("pillar_agents", lang), t("pillar_agents_body", lang)),
-    ]
-
-    logos_row = [
-        "Microsoft (ISD)", "ARM Holdings", "DBRS Morningstar", "London Stock Exchange Group",
-        "Nando's", "Indurent (Blackstone)",
-    ]
-
-    home_cases = [c for c in ALL_CASES if c["id"] in ("uk-traffic-od", "nordic-health-rwd", "microsoft-isd")]
-
+def home():
+    featured = [p for p in PRODUCTS if p["name"] in FEATURED]
     return page(
-        t("home_eyebrow", lang),
+        "Open enterprise software for SMEs",
         "/",
-        Hero(
-            eyebrow=t("home_eyebrow", lang),
-            headline=(Span(t("home_headline_1", lang)), Span(t("home_headline_2", lang), cls="text-accent"), Span(t("home_headline_3", lang))),
-            lede=t("home_lede", lang),
-            ctas=[(t("home_cta_see", lang), "/platform", True), (t("nav_talk_to_us", lang), "/contact", False)],
-            lang=lang,
-        ),
-
-        Section_(
-            Eyebrow(t("home_precedent", lang)),
-            Heading(2, t("home_precedent_heading", lang), cls="mt-4 max-w-3xl"),
-            Div(
-                *[Div(name, cls="text-ink-muted text-sm md:text-base font-medium border border-line rounded-full px-4 py-2") for name in logos_row],
-                cls="mt-10 flex flex-wrap gap-3",
-            ),
-            cls="border-b border-line",
-        ),
-
-        Section_(
-            Div(
-                Eyebrow(t("home_capabilities", lang)),
-                Heading(2, t("home_cap_heading", lang), cls="mt-4 max-w-4xl"),
-                P(t("home_cap_body", lang), cls="mt-5 text-ink-muted text-lg max-w-3xl"),
-                cls="mb-14",
-            ),
-            Div(
-                *[Pillar(n, title, body) for n, title, body in pillars],
-                cls="grid md:grid-cols-2 lg:grid-cols-4 gap-5",
-            ),
-        ),
-
-        Section_(
-            Div(
-                Eyebrow(t("home_where", lang)),
-                Heading(2, t("home_where_heading", lang), cls="mt-4 max-w-4xl"),
-                cls="mb-14",
-            ),
-            Div(
-                _sector_link(t("sector_defense_title", lang), t("sector_defense_body", lang), "/solutions/defense"),
-                _sector_link(t("sector_health_title", lang), t("sector_health_body", lang), "/solutions/healthcare"),
-                _sector_link(t("sector_public_title", lang), t("sector_public_body", lang), "/solutions/public"),
-                _sector_link(t("sector_financial_title", lang), t("sector_financial_body", lang), "/solutions/financial"),
-                cls="grid md:grid-cols-2 gap-5",
-            ),
-            cls="border-y border-line bg-bg-elevated/40",
-        ),
-
-        Section_(
-            Div(
-                Eyebrow(t("home_selected_work", lang)),
-                Heading(2, t("home_selected_heading", lang), cls="mt-4 max-w-3xl"),
-                cls="mb-14 flex flex-col md:flex-row md:items-end md:justify-between gap-4",
-            ),
-            Div(
-                *[CaseStudyCard(c, compact=True, lang=lang) for c in home_cases],
-                cls="grid md:grid-cols-3 gap-5",
-            ),
-            Div(
-                Button_(t("home_all_cases", lang), href="/case-studies", primary=False),
-                cls="mt-10",
-            ),
-        ),
-
-        Section_(
+        Section(
             Div(
                 Div(
-                    Eyebrow(t("nav_signal", lang)),
-                    Heading(2, t("home_signal_heading", lang), cls="mt-4 max-w-3xl"),
-                    P(t("home_signal_body", lang),
-                        cls="mt-5 text-ink-muted text-lg max-w-2xl leading-relaxed",
-                    ),
-                    Button_(t("home_open_signal", lang), href="/signal", primary=True, cls="mt-8"),
-                    cls="md:w-2/5",
+                    Eyebrow("Open source · affordable · globally useful"),
+                    Heading("Big-company capability. Small-business economics.", 1, "mt-6 max-w-5xl"),
+                    P("FastSME brings the software capabilities of large enterprises to SMEs and SMBs worldwide — as practical open-source products that are affordable to adopt, own and extend.", cls="mt-7 max-w-3xl text-lg leading-8 text-muted md:text-xl"),
+                    Div(Button_("Explore 23 products", "/products"), Button_("Talk to the team", "/contact", False), cls="mt-9 flex flex-wrap gap-3"),
+                    cls="relative z-10",
                 ),
                 Div(
-                    Div(id="signal-teaser", cls="w-full h-[360px]"),
-                    cls="md:w-3/5 p-3 rounded-2xl bg-bg-elevated border border-line",
+                    Span("OPEN", cls="absolute right-4 top-8 font-display text-[22vw] font-bold leading-none text-leaf/[.06]"),
+                    cls="pointer-events-none absolute inset-0 overflow-hidden",
                 ),
-                cls="flex flex-col md:flex-row gap-10 items-stretch",
+                cls="relative mx-auto flex min-h-[76vh] max-w-7xl items-center px-5 py-20 md:px-8",
             ),
-            cls="border-y border-line",
-        ),
-
-        NewsSection(
-            category="home",
-            title=t("home_news_title", lang),
-            subtitle=t("home_news_subtitle", lang),
-            lang=lang,
-        ),
-
-        CTASection(lang=lang),
-
-        # Load Plotly only when signal teaser present (home page only)
-        lang=lang,
-        body_extra=[
-            Script(src="https://cdn.plot.ly/plotly-2.35.2.min.js"),
-            Script(NotStr(f"window.PLOTLY_TEASER = {_teaser_json()};")),
-            Script(src="/static/signal.js"),
-            Script(src="/static/three-hero.js", type="module"),
-        ],
-    )
-
-
-def _sector_link(title, body, href):
-    return A(
-        Div(
-            Div(
-                Span(title, cls="text-ink text-xl font-medium tracking-tight"),
-                Span("→", cls="text-accent text-xl ml-auto"),
-                cls="flex items-center mb-3",
-            ),
-            P(body, cls="text-ink-muted text-sm leading-relaxed"),
-            cls="p-7 rounded-2xl border border-line bg-bg-elevated hover:border-accent/50 hover:bg-bg-raised transition-all",
-        ),
-        href=href,
-        cls="block",
-    )
-
-
-def _teaser_json():
-    import json
-    from content import signal as s
-    nhs, _ = s.nhs_charts()
-    # Simplify layout for teaser
-    nhs["layout"]["title"]["text"] = "NHS England waiting list · treemap by specialty"
-    nhs["layout"]["margin"] = {"l": 0, "r": 0, "t": 30, "b": 0}
-    return json.dumps(nhs)
-
-
-# ---------- /platform ----------
-
-@rt("/platform")
-def platform(request: Request):
-    lang = _lang(request)
-    pillars = [
-        ("01", t("pillar_doc_intel", lang), t("plat_pillar_doc_body", lang)),
-        ("02", t("pillar_forecasting", lang), t("plat_pillar_forecast_body", lang)),
-        ("03", t("pillar_geo", lang), t("plat_pillar_geo_body", lang)),
-        ("04", t("pillar_agents", lang), t("plat_pillar_agents_body", lang)),
-    ]
-
-    commitments = [
-        (t("commit_audit_title", lang), t("commit_audit_body", lang)),
-        (t("commit_open_title", lang), t("commit_open_body", lang)),
-        (t("commit_gdpr_title", lang), t("commit_gdpr_body", lang)),
-        (t("commit_eval_title", lang), t("commit_eval_body", lang)),
-    ]
-
-    return page(
-        t("platform_eyebrow", lang),
-        "/platform",
-        Section_(
-            Eyebrow(t("platform_eyebrow", lang)),
-            Heading(1, t("platform_headline", lang), cls="mt-5 max-w-5xl"),
-            P(t("platform_lede", lang),
-                cls="mt-8 text-xl text-ink-muted max-w-3xl leading-relaxed",
-            ),
-            cls="pt-24",
+            cls="border-b border-line bg-[radial-gradient(circle_at_80%_25%,#DDF5E5_0,transparent_38%)]",
         ),
         Section_(
             Div(
-                Eyebrow(t("home_capabilities", lang)),
-                Heading(2, t("platform_cap_heading", lang), cls="mt-4"),
-                cls="mb-14",
-            ),
-            Div(*[_platform_row(n, title, body) for n, title, body in pillars], cls="divide-y divide-line border-y border-line"),
-        ),
-        Section_(
-            Div(
-                Eyebrow(t("platform_commit_eyebrow", lang)),
-                Heading(2, t("platform_commit_heading", lang), cls="mt-4 max-w-4xl"),
-                cls="mb-14",
-            ),
-            Div(
-                *[Div(
-                    Heading(3, title, cls="mb-2"),
-                    P(body, cls="text-ink-muted text-sm leading-relaxed"),
-                    cls="p-7 rounded-2xl bg-bg-elevated border border-line",
-                ) for title, body in commitments],
-                cls="grid md:grid-cols-2 gap-5",
-            ),
-            cls="border-t border-line bg-bg-elevated/40",
-        ),
-        CTASection(lang=lang),
-        lang=lang,
-        body_extra=[Script(src="/static/three-hero.js", type="module")],
-    )
-
-
-def _platform_row(number, title, body):
-    return Div(
-        Div(
-            Div(number, cls="font-mono text-xs tracking-widest text-accent"),
-            cls="md:w-24 shrink-0",
-        ),
-        Div(
-            Heading(3, title, cls="mb-3"),
-            P(body, cls="text-ink-muted leading-relaxed"),
-            cls="flex-1",
-        ),
-        cls="flex flex-col md:flex-row gap-6 py-10",
-    )
-
-
-# ---------- /solutions/* ----------
-
-SOLUTIONS = {
-    "defense": {
-        "title_key": "sol_defense_title",
-        "headline_key": "sol_defense_headline",
-        "lede_key": "sol_defense_lede",
-        "pillars": [
-            ("sol_def_pillar1_title", "sol_def_pillar1_body"),
-            ("sol_def_pillar2_title", "sol_def_pillar2_body"),
-            ("sol_def_pillar3_title", "sol_def_pillar3_body"),
-        ],
-        "case_ids": ["nl-justice-dataplatform", "nordic-city-signal", "uk-traffic-od"],
-        "register": ["sol_reg_operational_confidence", "sol_reg_audit_trail", "sol_reg_human_authority"],
-        "news_cat": "defense",
-    },
-    "healthcare": {
-        "title_key": "sol_health_title",
-        "headline_key": "sol_health_headline",
-        "lede_key": "sol_health_lede",
-        "pillars": [
-            ("sol_health_pillar1_title", "sol_health_pillar1_body"),
-            ("sol_health_pillar2_title", "sol_health_pillar2_body"),
-            ("sol_health_pillar3_title", "sol_health_pillar3_body"),
-        ],
-        "case_ids": ["nordic-health-rwd", "nordic-health-panel", "microsoft-isd"],
-        "register": ["sol_reg_gdpr", "sol_reg_ai_act", "sol_reg_clinical_audit"],
-        "news_cat": "healthcare",
-    },
-    "public": {
-        "title_key": "sol_public_title",
-        "headline_key": "sol_public_headline",
-        "lede_key": "sol_public_lede",
-        "pillars": [
-            ("sol_pub_pillar1_title", "sol_pub_pillar1_body"),
-            ("sol_pub_pillar2_title", "sol_pub_pillar2_body"),
-            ("sol_pub_pillar3_title", "sol_pub_pillar3_body"),
-        ],
-        "case_ids": ["uk-traffic-od", "nordic-city-signal", "dk-data-quality"],
-        "register": ["sol_reg_open_source", "sol_reg_reference", "sol_reg_interop"],
-        "news_cat": "public",
-    },
-    "financial": {
-        "title_key": "sol_financial_title",
-        "headline_key": "sol_financial_headline",
-        "lede_key": "sol_financial_lede",
-        "pillars": [
-            ("sol_fin_pillar1_title", "sol_fin_pillar1_body"),
-            ("sol_fin_pillar2_title", "sol_fin_pillar2_body"),
-            ("sol_fin_pillar3_title", "sol_fin_pillar3_body"),
-        ],
-        "case_ids": ["dbrs-rmbs", "arm-forecasting", "microsoft-isd"],
-        "register": ["sol_reg_prod_ml", "sol_reg_regulatory", "sol_reg_enterprise"],
-        "news_cat": "financial",
-    },
-}
-
-
-def _solution_page(slug, request: Request):
-    lang = _lang(request)
-    s = SOLUTIONS[slug]
-    cases = [c for c in ALL_CASES if c["id"] in s["case_ids"]]
-
-    return page(
-        t(s["title_key"], lang),
-        f"/solutions/{slug}",
-        Section_(
-            Eyebrow(t(s["title_key"], lang)),
-            Heading(1, t(s["headline_key"], lang), cls="mt-5 max-w-5xl"),
-            P(t(s["lede_key"], lang), cls="mt-8 text-xl text-ink-muted max-w-3xl leading-relaxed"),
-            Div(
-                *[Pill(t(r, lang)) for r in s["register"]],
-                cls="mt-10 flex flex-wrap gap-2",
-            ),
-            cls="pt-24",
-        ),
-        Section_(
-            Div(
-                Eyebrow(t("sol_where_focus", lang)),
-                Heading(2, t("sol_three_focal", lang), cls="mt-4"),
-                cls="mb-14",
-            ),
-            Div(
-                *[Pillar(f"0{i+1}", t(title_key, lang), t(body_key, lang)) for i, (title_key, body_key) in enumerate(s["pillars"])],
-                cls="grid md:grid-cols-3 gap-5",
-            ),
-        ),
-        Section_(
-            Div(
-                Eyebrow(t("sol_in_practice", lang)),
-                Heading(2, t("sol_looks_like", lang), cls="mt-4 max-w-3xl"),
-                cls="mb-14",
-            ),
-            Div(
-                *[CaseStudyCard(c, lang=lang) for c in cases],
-                cls="grid md:grid-cols-3 gap-5",
-            ),
-            cls="border-t border-line bg-bg-elevated/40",
-        ),
-        NewsSection(category=s["news_cat"], title=t(s["title_key"], lang), lang=lang),
-        CTASection(lang=lang),
-        lang=lang,
-    )
-
-
-@rt("/solutions/defense")
-def sol_defense(request: Request):
-    return _solution_page("defense", request)
-
-
-@rt("/solutions/healthcare")
-def sol_health(request: Request):
-    return _solution_page("healthcare", request)
-
-
-@rt("/solutions/public")
-def sol_public(request: Request):
-    return _solution_page("public", request)
-
-
-@rt("/solutions/financial")
-def sol_financial(request: Request):
-    return _solution_page("financial", request)
-
-
-# ---------- /case-studies ----------
-
-@rt("/case-studies")
-def case_studies(request: Request):
-    lang = _lang(request)
-    return page(
-        t("nav_case_studies", lang),
-        "/case-studies",
-        Section_(
-            Eyebrow(t("nav_case_studies", lang)),
-            Heading(1, t("cases_headline", lang), cls="mt-5 max-w-4xl"),
-            P(t("cases_lede", lang),
-              cls="mt-8 text-xl text-ink-muted max-w-3xl leading-relaxed"),
-            cls="pt-24",
-        ),
-        Section_(
-            Div(
-                Eyebrow(t("cases_current_eyebrow", lang)),
-                Heading(2, t("cases_current_heading", lang), cls="mt-4"),
-                cls="mb-14",
-            ),
-            Div(
-                *[CaseStudyCard(c, lang=lang) for c in BID_DERIVED],
-                cls="grid md:grid-cols-2 gap-5",
-            ),
-        ),
-        Section_(
-            Div(
-                Eyebrow(t("cases_named_eyebrow", lang)),
-                Heading(2, t("cases_named_heading", lang), cls="mt-4"),
-                cls="mb-14",
-            ),
-            Div(
-                *[CaseStudyCard(c, lang=lang) for c in NAMED_PRECEDENTS],
-                cls="grid md:grid-cols-3 gap-5",
-            ),
-            cls="border-t border-line bg-bg-elevated/40",
-        ),
-        CTASection(lang=lang),
-        lang=lang,
-    )
-
-
-# ---------- /signal ----------
-
-@rt("/signal")
-def signal(request: Request):
-    lang = _lang(request)
-    charts = signal_mod.all_charts()
-    tabs = []
-    panels = []
-    for key, block in charts.items():
-        sig_title = t(f"sig_{key}_title", lang)
-        sig_eyebrow = t(f"sig_{key}_eyebrow", lang)
-        sig_summary = t(f"sig_{key}_summary", lang)
-        tabs.append(
-            Button(
-                sig_title,
-                type="button",
-                cls="signal-tab",
-                **{"data-signal-tab": key},
-            )
-        )
-        panels.append(
-            Div(
-                Div(
-                    Eyebrow(sig_eyebrow),
-                    Heading(2, sig_title, cls="mt-4"),
-                    P(sig_summary, cls="mt-5 text-ink-muted text-lg max-w-3xl leading-relaxed"),
-                    cls="mb-10",
-                ),
-                Div(
-                    Div(
-                        Div(id=f"chart-{key}-primary", cls="w-full"),
-                        cls="chart-frame md:col-span-2",
-                    ),
-                    Div(
-                        Div(id=f"chart-{key}-secondary", cls="w-full"),
-                        cls="chart-frame",
-                    ),
-                    cls="grid md:grid-cols-3 gap-5",
-                ),
-                Div(
-                    Span(t("signal_source", lang), cls="text-ink-dim text-xs"),
-                    A(block["source"]["label"], href=block["source"]["url"], target="_blank", cls="text-accent text-xs hover:underline"),
-                    cls="mt-4",
-                ),
-                cls="hidden",
-                **{"data-signal-panel": key},
-            )
-        )
-
-    return page(
-        "Signal",
-        "/signal",
-        Section_(
-            Eyebrow(t("nav_signal", lang)),
-            Heading(1, t("signal_headline", lang), cls="mt-5 max-w-5xl"),
-            P(t("signal_lede", lang),
-              cls="mt-8 text-xl text-ink-muted max-w-3xl leading-relaxed"),
-            cls="pt-24",
-        ),
-        Section_(
-            Div(*tabs, cls="flex flex-wrap gap-3 mb-10"),
-            Div(*panels),
-            cls="border-t border-line",
-        ),
-        CTASection(
-            headline=t("signal_cta_headline", lang),
-            body=t("signal_cta_body", lang),
-            lang=lang,
-        ),
-        lang=lang,
-        body_extra=[
-            Script(src="https://cdn.plot.ly/plotly-2.35.2.min.js"),
-            Script(NotStr(f"window.PLOTLY_DATA = {signal_mod.as_json()};")),
-            Script(src="/static/signal.js"),
-        ],
-    )
-
-
-# ---------- /open-source ----------
-
-@rt("/research")
-def research_redirect():
-    return RedirectResponse("/open-source", status_code=301)
-
-@rt("/open-source")
-def open_source(request: Request):
-    lang = _lang(request)
-    return page(
-        "Open Source",
-        "/open-source",
-        Section_(
-            Eyebrow(t("research_eyebrow", lang)),
-            Heading(1, t("research_headline", lang), cls="mt-5 max-w-4xl"),
-            P(t("research_lede", lang),
-              cls="mt-8 text-xl text-ink-muted max-w-3xl leading-relaxed"),
-            P(
-                t("opensource_ec_note", lang) + " ",
-                A(t("opensource_ec_link", lang) + " →",
-                  href="https://digital-strategy.ec.europa.eu/en/policies/open-source-strategy",
-                  target="_blank", cls="text-accent hover:underline"),
-                cls="mt-6 text-ink-muted max-w-3xl leading-relaxed",
-            ),
-            cls="pt-24",
-        ),
-        Section_(
-            Div(
-                Eyebrow(t("os_resilience_eyebrow", lang)),
-                Heading(2, t("os_resilience_heading", lang), cls="mt-4 max-w-4xl"),
-                P(t("os_resilience_body1", lang),
-                  cls="mt-8 text-ink-muted text-lg max-w-3xl leading-relaxed mb-6"),
-                P(t("os_resilience_body2", lang),
-                  cls="text-ink-muted text-lg max-w-3xl leading-relaxed"),
-                cls="max-w-4xl",
-            ),
-            cls="border-t border-line bg-bg-elevated/40",
-        ),
-        Section_(
-            Div(
-                Eyebrow("Open-source app suite"),
-                Heading(2, "Open Source Enterprise", cls="mt-4 max-w-3xl"),
-                P(
-                    "A complete suite of open-source business apps — CRM, helpdesk, ERP, HR, "
-                    "mail, analytics and more — each with a built-in AI assistant. Free to use, "
-                    "self-hostable, and yours to extend.",
-                    cls="mt-6 text-ink-muted max-w-3xl leading-relaxed",
-                ),
-                cls="mb-14",
-            ),
-            *[
-                Div(
-                    Div(
-                        Span(grp["category"], cls="text-ink font-medium"),
-                        Span(grp["blurb"], cls="ml-3 text-ink-muted text-sm"),
-                        cls="flex items-baseline mb-5 pb-3 border-b border-line",
-                    ),
-                    Div(
-                        *[
-                            A(
-                                Div(
-                                    Div(
-                                        Span(app["name"], cls="font-semibold text-ink"),
-                                        Span(
-                                            app["feature"],
-                                            cls="ml-auto text-[10px] font-mono tracking-widest px-2 py-0.5 rounded-full border border-accent text-accent",
-                                        ),
-                                        cls="flex items-center mb-3",
-                                    ),
-                                    P(app["tagline"], cls="text-ink-muted text-sm leading-relaxed mb-4"),
-                                    Div(
-                                        Span("Open source · MIT", cls="text-[11px] text-ink-muted"),
-                                        Span("View →", cls="ml-auto text-accent text-sm"),
-                                        cls="flex items-center",
-                                    ),
-                                    cls="p-6 rounded-2xl bg-bg-elevated border border-line hover:border-accent/50 transition-colors h-full",
-                                ),
-                                href=app["url"],
-                                target="_blank",
-                                cls="block",
-                            )
-                            for app in grp["apps"]
-                        ],
-                        cls="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12",
-                    ),
-                )
-                for grp in APP_SUITE
-            ],
-            cls="border-b border-line",
-        ),
-        Section_(
-            Div(
-                Eyebrow(t("research_repos_eyebrow", lang)),
-                Heading(2, t("research_repos_heading", lang), cls="mt-4"),
-                cls="mb-14",
-            ),
-            Div(
-                *[
-                    A(
-                        Div(
-                            Div(
-                                Span(r["name"], cls="font-mono text-ink text-sm"),
-                                Span(r["relevance"], cls=f"ml-auto text-[10px] font-mono tracking-widest px-2 py-0.5 rounded-full border {'border-accent text-accent' if r['relevance']=='HIGH' else 'border-line text-ink-muted'}"),
-                                cls="flex items-center mb-4",
-                            ),
-                            P(r["tagline"], cls="text-ink-muted text-sm leading-relaxed mb-4"),
-                            Div(*[Pill(tag) for tag in r["tags"]], cls="flex flex-wrap gap-2"),
-                            cls="p-6 rounded-2xl bg-bg-elevated border border-line hover:border-accent/50 transition-colors h-full",
-                        ),
-                        href=r["url"],
-                        target="_blank",
-                        cls="block",
-                    )
-                    for r in REPOS
-                ],
-                cls="grid md:grid-cols-2 lg:grid-cols-3 gap-5",
-            ),
-        ),
-        Section_(
-            Div(
-                Eyebrow(t("research_platforms_eyebrow", lang)),
-                Heading(2, t("research_platforms_heading", lang), cls="mt-4 max-w-3xl"),
-                cls="mb-14",
-            ),
-            Div(
-                *[
-                    A(
-                        Div(
-                            Heading(3, r["name"], cls="mb-3"),
-                            P(r["tagline"], cls="text-ink-muted text-sm leading-relaxed mb-5"),
-                            Div(
-                                Span(t("research_visit", lang) + " ", cls="text-accent text-sm"),
-                                Span("→", cls="text-accent text-sm"),
-                            ),
-                            cls="p-6 rounded-2xl bg-bg-elevated border border-line hover:border-accent/50 transition-colors h-full",
-                        ),
-                        href=r["url"],
-                        target="_blank",
-                        cls="block",
-                    )
-                    for r in EXTERNAL_RESEARCH
-                ],
-                cls="grid md:grid-cols-2 gap-5",
-            ),
-            cls="border-t border-line bg-bg-elevated/40",
-        ),
-        CTASection(lang=lang),
-        lang=lang,
-    )
-
-
-# ---------- /team ----------
-
-@rt("/team")
-def team(request: Request):
-    lang = _lang(request)
-    return page(
-        "Team",
-        "/team",
-        Section_(
-            Eyebrow(t("nav_team", lang)),
-            Heading(1, t("team_headline", lang), cls="mt-5 max-w-4xl"),
-            P(t("team_lede", lang),
-              cls="mt-8 text-xl text-ink-muted max-w-3xl leading-relaxed"),
-            cls="pt-24",
-        ),
-        Section_(
-            Div(
-                *[_member_card(m, lang=lang) for m in TEAM],
-                cls="grid md:grid-cols-2 gap-5",
-            ),
-        ),
-        CTASection(headline=t("team_join_headline", lang), body=t("team_join_body", lang), cta_label=t("team_write", lang), lang=lang),
-        lang=lang,
-    )
-
-
-def _member_card(m, *, lang="en"):
-    ikey = m["initials"].lower()
-    return Article(
-        Div(
-            Div(m["initials"], cls="w-14 h-14 rounded-full bg-bg-raised border border-line flex items-center justify-center text-ink font-mono text-sm"),
-            Div(
-                Heading(3, m["name"], cls="mb-1"),
-                P(t(f"team_{ikey}_role", lang), cls="text-accent text-sm font-mono"),
-            ),
-            cls="flex items-center gap-4 mb-5",
-        ),
-        P(t(f"team_{ikey}_bio", lang), cls="text-ink-muted leading-relaxed mb-6"),
-        A(
-            Span("LinkedIn", cls="text-sm"),
-            Span("→", cls="text-sm"),
-            href=m["linkedin"],
-            target="_blank",
-            cls="inline-flex items-center gap-2 text-ink hover:text-accent transition-colors",
-        ),
-        cls="p-8 rounded-2xl bg-bg-elevated border border-line",
-    )
-
-
-# ---------- /thesis ----------
-
-@rt("/thesis")
-def thesis(request: Request):
-    lang = _lang(request)
-    proposals = [
-        (t("thesis_p1_title", lang), t("thesis_p1_body", lang)),
-        (t("thesis_p2_title", lang), t("thesis_p2_body", lang)),
-        (t("thesis_p3_title", lang), t("thesis_p3_body", lang)),
-        (t("thesis_p4_title", lang), t("thesis_p4_body", lang)),
-        (t("thesis_p5_title", lang), t("thesis_p5_body", lang)),
-        (t("thesis_p6_title", lang), t("thesis_p6_body", lang)),
-    ]
-
-    return page(
-        t("thesis_eyebrow", lang),
-        "/thesis",
-        Section_(
-            Eyebrow(t("thesis_eyebrow", lang)),
-            Heading(1, t("thesis_headline", lang), cls="mt-5 max-w-5xl"),
-            P(t("thesis_lede", lang), cls="mt-8 text-xl text-ink-muted max-w-3xl leading-relaxed"),
-            Div(
-                Pill(t("thesis_pill_sovereignty", lang)),
-                Pill(t("thesis_pill_opensource", lang)),
-                Pill(t("thesis_pill_policy", lang)),
-                cls="mt-8 flex flex-wrap gap-2",
-            ),
-            cls="pt-24",
-        ),
-        Section_(
-            Div(
-                Eyebrow(t("thesis_proposals_eyebrow", lang)),
-                Heading(2, t("thesis_proposals_heading", lang), cls="mt-4"),
-                cls="mb-14",
-            ),
-            Div(
-                *[Div(
-                    Div(
-                        Span(f"0{i+1}", cls="font-mono text-xs tracking-widest text-accent"),
-                        cls="mb-4",
-                    ),
-                    Heading(3, title, cls="mb-3"),
-                    P(body, cls="text-ink-muted text-sm leading-relaxed"),
-                    cls="p-7 rounded-2xl bg-bg-elevated border border-line",
-                ) for i, (title, body) in enumerate(proposals)],
-                cls="grid md:grid-cols-2 lg:grid-cols-3 gap-5",
-            ),
-        ),
-        Section_(
-            Div(
-                Eyebrow(t("resilience_eyebrow", lang)),
-                Heading(2, t("resilience_heading", lang), cls="mt-4 max-w-4xl"),
-                P(t("resilience_lede", lang),
-                  cls="mt-8 text-ink-muted text-lg max-w-3xl leading-relaxed"),
+                Eyebrow("One connected portfolio"),
+                Heading("Start with the problem you need to solve.", 2, "mt-4 max-w-3xl"),
+                P("Use one product, combine several, or adapt the source to the way your business already works.", cls="mt-5 max-w-2xl leading-7 text-muted"),
                 cls="mb-12",
             ),
-            Div(
-                *[Div(
-                    Heading(3, title, cls="mb-3"),
-                    P(body, cls="text-ink-muted text-sm leading-relaxed"),
-                    cls="p-7 rounded-2xl bg-bg-elevated border border-line",
-                ) for title, body in [
-                    (t("resilience_c1_title", lang), t("resilience_c1_body", lang)),
-                    (t("resilience_c2_title", lang), t("resilience_c2_body", lang)),
-                    (t("resilience_c3_title", lang), t("resilience_c3_body", lang)),
-                ]],
-                cls="grid md:grid-cols-3 gap-5",
-            ),
-            cls="border-t border-line",
+            Div(*[ProductCard(p) for p in featured], cls="grid gap-5 md:grid-cols-2 lg:grid-cols-3"),
+            Div(Button_("See the complete portfolio", "/products", False), cls="mt-10"),
         ),
         Section_(
             Div(
-                Eyebrow(t("thesis_why_eyebrow", lang)),
-                Heading(2, t("thesis_why_heading", lang), cls="mt-4 max-w-4xl"),
-                cls="mb-10",
+                Div(Eyebrow("Why FastSME"), Heading("Enterprise patterns without enterprise lock-in.", 2, "mt-4 max-w-3xl")),
+                Div(
+                    *[
+                        Article(Span(f"0{i}", cls="text-xs font-bold text-leaf"), H3(title, cls="mt-4 font-display text-xl font-semibold"), P(body, cls="mt-3 text-sm leading-6 text-muted"))
+                        for i, (title, body) in enumerate([
+                            ("Open by default", "Inspect the code, self-host it and keep control of your data and roadmap."),
+                            ("Designed to connect", "A consistent Python-first stack makes the suite easier to understand and integrate."),
+                            ("AI where it helps", "Grounded assistants support real workflows instead of adding a decorative chatbot."),
+                            ("Affordable ownership", "Avoid per-seat economics that punish growing teams."),
+                        ], 1)
+                    ],
+                    cls="grid gap-8 sm:grid-cols-2",
+                ),
+                cls="grid gap-14 lg:grid-cols-2",
             ),
-            P(t("thesis_why_body1", lang), cls="text-ink-muted text-lg max-w-3xl leading-relaxed mb-8"),
-            P(t("thesis_why_body2", lang), cls="text-ink-muted text-lg max-w-3xl leading-relaxed mb-10"),
+            cls="border-y border-line bg-mint/45",
+        ),
+        Section_(
+            Eyebrow("Proven in demanding environments"),
+            Heading("Experience shaped with global organisations.", 2, "mt-4 max-w-4xl"),
+            Div(*[Span(name, cls="rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-forest") for name, _, _ in CLIENTS[:10]], cls="mt-9 flex flex-wrap gap-3"),
+            Div(Button_("See client experience", "/clients", False), cls="mt-9"),
+        ),
+        Section_(
             Div(
-                Button_(t("thesis_read_more", lang), href="https://digital-strategy.ec.europa.eu/en/policies/open-source-strategy", primary=True),
-                Button_(t("thesis_see_research", lang), href="/open-source", primary=False),
-                cls="flex items-center gap-3 flex-wrap",
+                Div(Eyebrow("A better software bargain"), Heading("Your tools should compound your advantage — not your licence bill.", 2, "mt-4 max-w-4xl"), P("FastSME is building a durable open-source layer for the businesses that create most of the world's jobs, but are too often priced out of the best technology.", cls="mt-6 max-w-3xl text-lg leading-8 text-muted")),
+                Div(Button_("Read our thesis", "/thesis"), Button_(CONTACT_EMAIL, f"mailto:{CONTACT_EMAIL}", False), cls="mt-9 flex flex-wrap gap-3"),
+                cls="rounded-[2rem] bg-forest p-8 text-white md:p-14 [&_h2]:!text-white [&_p]:!text-white/70",
             ),
-            cls="border-t border-line bg-bg-elevated/40",
         ),
-        CTASection(
-            headline=t("thesis_cta_headline", lang),
-            body=t("thesis_cta_body", lang),
-            lang=lang,
-        ),
-        lang=lang,
     )
 
 
-# ---------- /contact ----------
+@rt("/products")
+def products():
+    sections = []
+    for group in GROUPS:
+        group_products = [p for p in PRODUCTS if p["category"] == group["name"]]
+        sections.append(Section_(
+            Div(Eyebrow(group["name"]), Heading(group["name"], 2, "mt-3"), P(group["description"], cls="mt-4 text-muted"), cls="mb-10"),
+            Div(*[ProductCard(p) for p in group_products], cls="grid gap-5 md:grid-cols-2 lg:grid-cols-3"),
+            cls="border-t border-line first:border-0",
+        ))
+    return page("Products", "/products", _intro("23 products · one open platform", "Tools for every stage of running a business.", "From first customer to complex operations, FastSME gives smaller businesses a practical route to software normally reserved for large enterprises."), *sections)
+
+
+@rt("/clients")
+def clients():
+    return page(
+        "Clients", "/clients",
+        _intro("Client experience", "Built through real enterprise delivery.", "Our products are shaped by hands-on work across technology, finance, industry, healthcare, retail, energy and real estate."),
+        Section_(
+            Div(*[
+                Article(Span(sector, cls="text-xs font-semibold uppercase tracking-widest text-leaf"), H3(name, cls="mt-4 font-display text-2xl font-semibold"), P(work, cls="mt-3 text-sm leading-6 text-muted"), cls="rounded-3xl border border-line bg-white p-7")
+                for name, sector, work in CLIENTS
+            ], cls="grid gap-5 md:grid-cols-2 lg:grid-cols-3"),
+            P("Selected client and professional experience of FastSME's owner and team. Descriptions are intentionally concise and exclude confidential details.", cls="mt-8 text-xs leading-5 text-muted"),
+        ),
+    )
+
+
+@rt("/open-source")
+def open_source():
+    return page(
+        "Open source", "/open-source",
+        _intro("Built in the open", "Software you can inspect, run and improve.", "Open source changes the economics of business software: you can understand what a system does, choose where it runs and build on it without waiting for a vendor."),
+        Section_(
+            Div(*[
+                Article(Span(str(i).zfill(2), cls="text-xs font-bold text-leaf"), Heading(title, 3, "mt-5"), P(body, cls="mt-4 leading-7 text-muted"), cls="rounded-3xl border border-line bg-white p-7")
+                for i, (title, body) in enumerate([
+                    ("Own the deployment", "Run FastSME products on your infrastructure, in your cloud or with a trusted operator."),
+                    ("Keep your data portable", "Open code and conventional storage reduce dependence on one supplier's platform."),
+                    ("Adapt the workflow", "Change the product around the way your company creates value — not the other way around."),
+                    ("Share the progress", "Reusable improvements can benefit thousands of businesses facing the same operational problems."),
+                ], 1)
+            ], cls="grid gap-5 md:grid-cols-2"),
+            Div(Button_("Browse all repositories", "https://github.com/predictivelabsai"), Button_("Explore products", "/products", False), cls="mt-10 flex flex-wrap gap-3"),
+        ),
+    )
+
+
+@rt("/thesis")
+def thesis():
+    return page(
+        "Thesis", "/thesis",
+        _intro("Our thesis", "The next productivity leap belongs to small business.", "SMEs and SMBs create extraordinary value, but their software choices are often a compromise between limited tools and enterprise suites whose cost and complexity do not fit."),
+        Section_(
+            Div(
+                Div(Heading("Large enterprises already know what good operational software can do.", 2), P("Integrated data, automated workflows, governed access and decision support have become structural advantages. Smaller companies deserve the same leverage without copying enterprise bureaucracy.", cls="mt-6 text-lg leading-8 text-muted")),
+                Div(*[
+                    Article(Strong(title, cls="font-display text-lg text-forest"), P(body, cls="mt-2 text-sm leading-6 text-muted"))
+                    for title, body in [
+                        ("Open source lowers the floor.", "The core capability can be shared instead of rebuilt and relicensed for every company."),
+                        ("A common stack lowers complexity.", "Consistent architecture makes products easier to deploy, integrate and maintain."),
+                        ("Services remain local.", "Partners can customise, host and support software close to each business and market."),
+                        ("AI changes the interface.", "Small teams can operate sophisticated systems through grounded, conversational assistance."),
+                    ]
+                ], cls="grid gap-6"),
+                cls="grid gap-16 lg:grid-cols-2",
+            ),
+            cls="border-y border-line bg-mint/40",
+        ),
+        Section_(Heading("Our goal is simple: make excellent business software a shared global utility.", 2, "max-w-5xl"), Div(Button_("See what we are building", "/products"), cls="mt-8")),
+    )
+
+
+def _person_card(person):
+    return Article(
+        Div(Span(person["initials"], cls="flex h-12 w-12 items-center justify-center rounded-2xl bg-mint text-sm font-bold text-forest"), Div(H3(person["name"], cls="font-display text-xl font-semibold"), P(person["role"], cls="mt-1 text-xs font-semibold text-leaf")), cls="flex items-center gap-4"),
+        P(person["bio"], cls="mt-5 text-sm leading-6 text-muted"),
+        A("LinkedIn →", href=person["linkedin"], target="_blank", rel="noopener", cls="mt-5 inline-block text-sm font-semibold text-forest hover:text-leaf"),
+        cls="rounded-3xl border border-line bg-white p-7",
+    )
+
+
+@rt("/team")
+def team():
+    return page(
+        "Team", "/team",
+        _intro("Team", "Builders, operators and specialist advisers.", "FastSME combines experience in enterprise delivery, open-source engineering, AI, fintech, healthcare and digital operations."),
+        Section_(Eyebrow("Core team"), Div(*[_person_card(p) for p in TEAM], cls="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3")),
+        Section_(Eyebrow("Advisory board"), Heading("Experience around the table.", 2, "mt-4"), Div(*[_person_card(p) for p in ADVISORY], cls="mt-10 grid gap-5 md:grid-cols-2"), cls="border-t border-line bg-mint/35"),
+    )
+
 
 @rt("/contact")
-def contact(request: Request):
-    lang = _lang(request)
+def contact():
     return page(
-        t("nav_contact", lang),
-        "/contact",
-        Section_(
-            Eyebrow(t("nav_contact", lang)),
-            Heading(1, t("contact_headline", lang), cls="mt-5 max-w-4xl"),
-            P(t("contact_lede", lang),
-              cls="mt-8 text-xl text-ink-muted max-w-3xl leading-relaxed"),
-            cls="pt-24",
-        ),
+        "Contact", "/contact",
+        _intro("Contact", "Tell us what your business needs to run better.", "Whether you want to adopt an existing FastSME product, combine several tools or sponsor a missing capability, start with a direct conversation."),
         Section_(
             Div(
-                Div(
-                    Eyebrow(t("contact_write_eyebrow", lang)),
-                    Heading(2, CONTACT_EMAIL, cls="mt-4 break-all"),
-                    P(t("contact_write_body", lang),
-                      cls="mt-5 text-ink-muted leading-relaxed"),
-                    Div(
-                        Button_(t("contact_email_btn", lang) + " " + CONTACT_EMAIL, href=f"mailto:{CONTACT_EMAIL}", primary=True),
-                        cls="mt-8",
-                    ),
-                    cls="p-10 rounded-2xl bg-bg-elevated border border-line",
-                ),
-                Div(
-                    Div(
-                        H3(t("contact_reg_office", lang), cls="text-sm font-mono tracking-widest uppercase text-ink-muted mb-3"),
-                        P("Predictive Labs Ltd", cls="text-ink"),
-                        P("155 Minories Street, Suite 275", cls="text-ink-muted"),
-                        P("London, EC3N 1AD", cls="text-ink-muted"),
-                        P("United Kingdom", cls="text-ink-muted"),
-                        P("Company no. 14857334", cls="text-ink-dim text-sm mt-3 font-mono"),
-                        cls="mb-10",
-                    ),
-                    Div(
-                        H3(t("contact_lt_entity", lang), cls="text-sm font-mono tracking-widest uppercase text-ink-muted mb-3"),
-                        P("Predictive Labs, UAB", cls="text-ink"),
-                        P("Medeinos g. 35-70", cls="text-ink-muted"),
-                        P("Vilnius, LT-06137", cls="text-ink-muted"),
-                        P("Lithuania", cls="text-ink-muted"),
-                        P("Reg. code 307863496", cls="text-ink-dim text-sm mt-3 font-mono"),
-                        cls="mb-10",
-                    ),
-                    Div(
-                        H3(t("contact_ee_entity", lang), cls="text-sm font-mono tracking-widest uppercase text-ink-muted mb-3"),
-                        P("Predictive Labs OÜ", cls="text-ink"),
-                        P("Karsti 3", cls="text-ink-muted"),
-                        P("Tallinn, 11625", cls="text-ink-muted"),
-                        P("Estonia", cls="text-ink-muted"),
-                        P("Registry code 12061679", cls="text-ink-dim text-sm mt-3 font-mono"),
-                        cls="mb-10",
-                    ),
-                    Div(
-                        H3(t("contact_ee_entity_2", lang), cls="text-sm font-mono tracking-widest uppercase text-ink-muted mb-3"),
-                        P("Manmouna OÜ", cls="text-ink"),
-                        P("Teelise tn 10, Nõmme linnaosa", cls="text-ink-muted"),
-                        P("10916 Tallinn, Harju maakond", cls="text-ink-muted"),
-                        P("Estonia", cls="text-ink-muted"),
-                        P("Registry code 16289310", cls="text-ink-dim text-sm mt-3 font-mono"),
-                        cls="mb-10",
-                    ),
-                    Div(
-                        H3("Canada", cls="text-sm font-mono tracking-widest uppercase text-ink-muted mb-3"),
-                        P("Predictive Labs Inc.", cls="text-ink"),
-                        P("155 East Beaver Creek Road, Suite 24-147", cls="text-ink-muted"),
-                        P("Richmond Hill, Ontario, L4B 2N1", cls="text-ink-muted"),
-                        P("Canada", cls="text-ink-muted"),
-                        P("OCN 1001679945", cls="text-ink-dim text-sm mt-3 font-mono"),
-                        cls="mb-10",
-                    ),
-                    Div(
-                        H3("United States", cls="text-sm font-mono tracking-widest uppercase text-ink-muted mb-3"),
-                        P("Predictive Labs LLC", cls="text-ink"),
-                        P("1331 Grand Street, Suite 607", cls="text-ink-muted"),
-                        P("Hoboken, NJ 07030", cls="text-ink-muted"),
-                        P("United States", cls="text-ink-muted"),
-                        P("ID 2025-001721250", cls="text-ink-dim text-sm mt-3 font-mono"),
-                        cls="mb-10",
-                    ),
-                    Div(
-                        H3(t("contact_channels", lang), cls="text-sm font-mono tracking-widest uppercase text-ink-muted mb-3"),
-                        A("GitHub", href=GITHUB_URL, target="_blank", cls="block text-ink hover:text-accent mb-2"),
-                        A("LinkedIn", href=LINKEDIN_URL, target="_blank", cls="block text-ink hover:text-accent mb-2"),
-                    ),
-                    cls="p-10 rounded-2xl bg-bg-elevated border border-line",
-                ),
-                cls="grid md:grid-cols-2 gap-5",
-            ),
+                Div(Eyebrow("Write to us"), Heading(CONTACT_EMAIL, 2, "mt-4 break-all"), P("We welcome SMEs, implementation partners, open-source contributors and organisations that want to sponsor useful shared software.", cls="mt-5 max-w-xl leading-7 text-muted"), Div(Button_("Send an email", f"mailto:{CONTACT_EMAIL}"), cls="mt-8")),
+                Div(H3("Registered office", cls="font-display text-xl font-semibold"), P(Strong("Exroad Fintech Ltd"), NotStr("<br>"), "trading as FastSME", NotStr("<br><br>"), "Company number 11914994", NotStr("<br><br>"), "155 Minories Street, Flat 275", NotStr("<br>"), "London, United Kingdom", NotStr("<br>"), "EC3N 1AD", cls="mt-5 text-sm leading-6 text-muted")),
+                cls="grid gap-12 rounded-[2rem] border border-line bg-white p-8 md:grid-cols-[2fr_1fr] md:p-12",
+            )
         ),
-        lang=lang,
     )
+
+
+@rt("/healthz")
+def healthz():
+    return JSONResponse({"status": "ok", "service": "fastsme"})
+
+
+@rt("/robots.txt")
+def robots():
+    return PlainTextResponse("User-agent: *\nAllow: /\nSitemap: https://fastsme.com/sitemap.xml\n")
+
+
+@rt("/sitemap.xml")
+def sitemap():
+    paths = ["", "/products", "/clients", "/open-source", "/thesis", "/team", "/contact"]
+    xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + "".join(f"<url><loc>https://fastsme.com{p}</loc></url>" for p in paths) + "</urlset>"
+    return PlainTextResponse(xml, media_type="application/xml")
+
+
+for old_path, new_path in {
+    "/platform": "/products", "/case-studies": "/clients", "/research": "/open-source",
+    "/signal": "/products", "/solutions/defense": "/products", "/solutions/healthcare": "/products",
+    "/solutions/public": "/products", "/solutions/financial": "/products",
+}.items():
+    def _make_redirect(target):
+        def _redirect():
+            return RedirectResponse(target, status_code=301)
+        return _redirect
+    rt(old_path)(_make_redirect(new_path))
 
 
 if __name__ == "__main__":
-    serve()
+    serve(port=int(os.environ.get("PORT", "5001")))

@@ -1,9 +1,10 @@
-"""
-Entrypoint. Kept as a thin shim so the existing Docker CMD (`python main.py`)
-continues to work without Dockerfile changes. All routing lives in app.py.
-"""
+"""FastSME application entrypoint."""
 
-from app import app, serve  # noqa: F401
+import os
+import uvicorn
+
+from app import app
+
 
 if __name__ == "__main__":
-    serve()
+    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", "5001")))

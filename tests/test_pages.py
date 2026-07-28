@@ -1,17 +1,8 @@
-"""
-Boots the FastHTML app in a subprocess, visits each route with Playwright
-(sync API), writes a full-page screenshot into screenshots/, and asserts the
-expected h1 is present. Independent of the Claude MCP Playwright runner.
+"""Browser smoke tests for the FastSME landing site."""
 
-Run:
-    pip install playwright pytest
-    python -m playwright install chromium
-    python -m pytest tests/test_pages.py -v
-"""
-
+import socket
 import subprocess
 import time
-import socket
 from pathlib import Path
 
 import pytest
@@ -21,76 +12,73 @@ try:
 except ImportError:
     pytest.skip("playwright not installed", allow_module_level=True)
 
-
 ROOT = Path(__file__).parent.parent
-SCREENSHOTS = ROOT / "screenshots"
-SCREENSHOTS.mkdir(exist_ok=True)
-
-HOST = "127.0.0.1"
-PORT = 5011  # different from dev server (5001) to avoid clashes
+OUTPUT = ROOT / "output" / "playwright"
+OUTPUT.mkdir(parents=True, exist_ok=True)
+PORT = 5011
 
 ROUTES = [
-    ("/", "home", "public good"),
-    ("/platform", "platform", "platform"),
-    ("/solutions/defense", "solutions-defense", "operational"),
-    ("/solutions/healthcare", "solutions-healthcare", "evidence"),
-    ("/solutions/public", "solutions-public", "operational insight"),
-    ("/solutions/financial", "solutions-financial", "selectively"),
-    ("/case-studies", "case-studies", "Engagements"),
-    ("/signal", "signal", "Public-sector data"),
-    ("/open-source", "open-source", "commons"),
-    ("/team", "team", "small group"),
-    ("/contact", "contact", "programme"),
+    ("/", "home", "Big-company capability"),
+    ("/products", "products", "Tools for every stage"),
+    ("/clients", "clients", "real enterprise delivery"),
+    ("/open-source", "open-source", "inspect, run and improve"),
+    ("/thesis", "thesis", "productivity leap"),
+    ("/team", "team", "Builders, operators"),
+    ("/contact", "contact", "business needs"),
 ]
 
 
-def _wait_for_port(host: str, port: int, timeout: float = 15.0):
+def _wait(timeout=15):
     start = time.time()
     while time.time() - start < timeout:
-        with socket.socket() as s:
+        with socket.socket() as sock:
             try:
-                s.connect((host, port))
+                sock.connect(("127.0.0.1", PORT))
                 return
             except OSError:
-                time.sleep(0.2)
-    raise TimeoutError(f"server on {host}:{port} did not come up")
+                time.sleep(.2)
+    raise TimeoutError("FastSME test server did not start")
 
 
 @pytest.fixture(scope="session")
 def server():
-    env_cmd = [".venv/bin/python", "-c", f"import os; os.environ.setdefault('PORT','{PORT}'); import main; main.serve(port={PORT})"]
     proc = subprocess.Popen(
-        env_cmd,
+        [str(ROOT / ".venv" / "bin" / "python"), "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", str(PORT)],
         cwd=ROOT,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
     )
     try:
-        _wait_for_port(HOST, PORT)
-        yield f"http://{HOST}:{PORT}"
+        _wait()
+        yield f"http://127.0.0.1:{PORT}"
     finally:
         proc.terminate()
-        try:
-            proc.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            proc.kill()
+        proc.wait(timeout=5)
 
 
 @pytest.mark.parametrize("path,slug,expected", ROUTES)
 def test_route(server, path, slug, expected):
-    url = f"{server}{path}"
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        ctx = browser.new_context(viewport={"width": 1440, "height": 900})
-        page = ctx.new_page()
-        page.goto(url, wait_until="networkidle")
-
-        if path == "/signal":
-            # wait for plotly to render at least one chart
-            page.wait_for_selector(".plotly-graph-div svg", timeout=5000)
-
-        h1_text = page.locator("h1").first.inner_text()
-        assert expected.lower() in h1_text.lower(), f"{path}: h1 '{h1_text}' does not contain '{expected}'"
-
-        page.screenshot(path=str(SCREENSHOTS / f"test-{slug}.png"), full_page=True)
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page(viewport={"width": 1440, "height": 900})
+        page.goto(server + path, wait_until="networkidle")
+        assert expected.lower() in page.locator("h1").first.inner_text().lower()
+        assert page.locator("text=Predictive Labs").count() == 0
+        page.screenshot(path=str(OUTPUT / f"{slug}.png"), full_page=True)
         browser.close()
+
+
+def test_mobile_navigation(server):
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page(viewport={"width": 390, "height": 844})
+        page.goto(server, wait_until="networkidle")
+        page.get_by_role("button", name="Toggle navigation").click()
+        assert page.locator("#mobile-nav").is_visible()
+        page.screenshot(path=str(OUTPUT / "home-mobile-nav.png"), full_page=True)
+        browser.close()
+
+
+def test_health_and_legacy_redirect(server):
+    import urllib.request
+    assert b'"status":"ok"' in urllib.request.urlopen(server + "/healthz").read()
+    response = urllib.request.urlopen(server + "/platform")
+    assert response.url.endswith("/products")
