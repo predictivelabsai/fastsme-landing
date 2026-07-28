@@ -2,6 +2,7 @@
 
 import socket
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -43,7 +44,7 @@ def _wait(timeout=15):
 @pytest.fixture(scope="session")
 def server():
     proc = subprocess.Popen(
-        [str(ROOT / ".venv" / "bin" / "python"), "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", str(PORT)],
+        [sys.executable, "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", str(PORT)],
         cwd=ROOT,
     )
     try:
