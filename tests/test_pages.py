@@ -62,7 +62,7 @@ def test_route(server, path, slug, expected):
         page = browser.new_page(viewport={"width": 1440, "height": 900})
         page.goto(server + path, wait_until="networkidle")
         assert expected.lower() in page.locator("h1").first.inner_text().lower()
-        assert page.locator("text=Predictive Labs").count() == 0
+        assert page.get_by_text("Powered by Predictive Labs Ltd", exact=True).count() == 1
         page.screenshot(path=str(OUTPUT / f"{slug}.png"), full_page=True)
         browser.close()
 
