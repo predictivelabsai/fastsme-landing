@@ -51,6 +51,12 @@ def Heading(text, level=2, cls=""):
 
 
 def ProductCard(product):
+    links = []
+    if product.get("demo_url"):
+        links.append(A("Open live demo →", href=product["demo_url"], target="_blank",
+                       rel="noopener", cls="text-sm font-semibold text-leaf hover:text-forest"))
+    links.append(A("View on GitHub ↗", href=product["url"], target="_blank", rel="noopener",
+                   cls="text-sm font-semibold text-forest/70 hover:text-leaf"))
     return Article(
         Div(
             Span(product["label"], cls="rounded-full bg-mint px-3 py-1 text-xs font-semibold text-forest"),
@@ -59,12 +65,12 @@ def ProductCard(product):
         ),
         H3(product["name"], cls="mt-6 font-display text-2xl font-semibold tracking-tight text-forest"),
         P(product["description"], cls="mt-3 text-sm leading-6 text-muted"),
-        A("View repository →", href=product["url"], target="_blank", rel="noopener", cls="mt-6 inline-block text-sm font-semibold text-leaf hover:text-forest"),
+        Div(*links, cls="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2"),
         cls="group rounded-3xl border border-line bg-paper p-6 shadow-[0_10px_35px_rgba(18,61,42,.05)] transition hover:-translate-y-1 hover:border-leaf/50",
     )
 
 
-def Navbar(current="/"):
+def Navbar(current="/", signed_in=False):
     links = [
         Li(A(label, href=href, cls=f"text-sm font-medium transition hover:text-leaf {'text-leaf' if current == href else 'text-forest'}"))
         for label, href in NAV
@@ -82,6 +88,9 @@ def Navbar(current="/"):
             ),
             Ul(*links, cls="hidden items-center gap-7 lg:flex"),
             Div(
+                A("Signed in" if signed_in else "Sign In",
+                  href="/products" if signed_in else "/auth/google",
+                  cls="hidden rounded-full border border-forest/20 px-4 py-2 text-sm font-semibold text-forest hover:border-leaf hover:text-leaf sm:block"),
                 A("Talk to us", href="/contact", cls="hidden rounded-full bg-forest px-4 py-2 text-sm font-semibold text-white hover:bg-leaf sm:block"),
                 Button("☰", type="button", aria_label="Toggle navigation", onclick="document.getElementById('mobile-nav').classList.toggle('hidden')", cls="rounded-lg border border-line bg-white px-3 py-2 text-forest lg:hidden"),
                 cls="flex items-center gap-3",
@@ -130,7 +139,7 @@ def Footer_():
     )
 
 
-def page(title, current, *content, description=None):
+def page(title, current, *content, description=None, signed_in=False):
     description = description or SITE_TAGLINE
     return Html(
         Head(
@@ -150,6 +159,6 @@ def page(title, current, *content, description=None):
             Link(rel="icon", type="image/svg+xml", href="/static/favicon.svg"),
             Link(rel="stylesheet", href="/static/site.css"),
         ),
-        Body(Navbar(current), Main(*content), Footer_(), cls="bg-canvas font-sans text-forest antialiased"),
+        Body(Navbar(current, signed_in), Main(*content), Footer_(), cls="bg-canvas font-sans text-forest antialiased"),
         lang="en",
     )

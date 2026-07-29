@@ -1,6 +1,10 @@
 """FastSME — open enterprise software for SMEs and SMBs globally."""
 
 import os
+import json
+import secrets
+from urllib.parse import urlencode
+from urllib.request import Request as UrlRequest, urlopen
 from starlette.requests import Request
 from starlette.responses import JSONResponse, RedirectResponse, PlainTextResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -11,7 +15,51 @@ from content.products import GROUPS, PRODUCTS, FEATURED
 from content.clients import CLIENTS
 from content.team import TEAM, ADVISORY
 
-app, rt = fast_app(static_path=".")
+app, rt = fast_app(static_path=".", secret_key=os.getenv("FASTSME_SESSION_SECRET", "fastsme-change-me"))
+
+
+def _google_callback_uri(request):
+    configured = os.getenv("GOOGLE_REDIRECT_URI")
+    if configured:
+        return configured
+    proto = request.headers.get("x-forwarded-proto") or request.url.scheme
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host")
+    return f"{proto}://{host}/auth/google/callback"
+
+
+@rt("/auth/google")
+def google_start(sess, request):
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "")
+    if not client_id:
+        return RedirectResponse("/?auth=not-configured", status_code=303)
+    state = secrets.token_urlsafe(32)
+    sess["google_oauth_state"] = state
+    query = urlencode({"client_id": client_id, "redirect_uri": _google_callback_uri(request),
+                       "response_type": "code", "scope": "openid email profile",
+                       "state": state, "prompt": "select_account"})
+    return RedirectResponse(f"https://accounts.google.com/o/oauth2/v2/auth?{query}", status_code=303)
+
+
+@rt("/auth/google/callback")
+def google_callback(sess, request, code: str = "", state: str = "", error: str = ""):
+    if error or not code or state != sess.pop("google_oauth_state", None):
+        return RedirectResponse("/?auth=failed", status_code=303)
+    data = urlencode({"code": code, "client_id": os.getenv("GOOGLE_CLIENT_ID", ""),
+                      "client_secret": os.getenv("GOOGLE_CLIENT_SECRET", ""),
+                      "redirect_uri": _google_callback_uri(request),
+                      "grant_type": "authorization_code"}).encode()
+    try:
+        token = json.loads(urlopen(UrlRequest("https://oauth2.googleapis.com/token", data=data),
+                                   timeout=20).read())
+        info_req = UrlRequest("https://openidconnect.googleapis.com/v1/userinfo",
+                              headers={"Authorization": f"Bearer {token['access_token']}"})
+        info = json.loads(urlopen(info_req, timeout=20).read())
+    except Exception:
+        return RedirectResponse("/?auth=failed", status_code=303)
+    if not info.get("email") or info.get("email_verified") is False:
+        return RedirectResponse("/?auth=failed", status_code=303)
+    sess["user_email"] = info["email"].strip().lower()
+    return RedirectResponse("/products", status_code=303)
 
 
 class CanonicalHostMiddleware(BaseHTTPMiddleware):
@@ -46,7 +94,7 @@ def home():
                     Eyebrow("Open source · affordable · globally useful"),
                     Heading("Big-company capability. Small-business economics.", 1, "mt-6 max-w-5xl"),
                     P("FastSME brings the software capabilities of large enterprises to SMEs and SMBs worldwide — as practical open-source products that are affordable to adopt, own and extend.", cls="mt-7 max-w-3xl text-lg leading-8 text-muted md:text-xl"),
-                    Div(Button_("Explore 23 products", "/products"), Button_("Talk to the team", "/contact", False), cls="mt-9 flex flex-wrap gap-3"),
+                    Div(Button_("Explore 18 live products", "/products"), Button_("Talk to the team", "/contact", False), cls="mt-9 flex flex-wrap gap-3"),
                     cls="relative z-10",
                 ),
                 Div(
@@ -112,7 +160,7 @@ def products():
             Div(*[ProductCard(p) for p in group_products], cls="grid gap-5 md:grid-cols-2 lg:grid-cols-3"),
             cls="border-t border-line first:border-0",
         ))
-    return page("Products", "/products", _intro("23 products · one open platform", "Tools for every stage of running a business.", "From first customer to complex operations, FastSME gives smaller businesses a practical route to software normally reserved for large enterprises."), *sections)
+    return page("Products", "/products", _intro("18 live products · one open platform", "Tools for every stage of running a business.", "From first customer to complex operations, FastSME gives smaller businesses a practical route to software normally reserved for large enterprises."), *sections)
 
 
 @rt("/clients")

@@ -7,6 +7,7 @@ GROUPS = [
         "name": "Sell & support",
         "description": "Find customers, manage relationships and keep service moving.",
         "products": [
+            ("FastFunnel", "Autonomous marketing", "Plan, create, review, schedule and measure marketing through a bounded AI agency."),
             ("FastCRM", "Sales CRM", "Leads, contacts, activities and a visual deal pipeline."),
             ("FastHelpdesk", "Customer support", "Tickets, teams, knowledge base and live SLA tracking."),
             ("FastESM", "Service management", "A service catalogue, workflows, requests, SLAs and role-based access."),
@@ -47,9 +48,8 @@ GROUPS = [
         "description": "Specialist workflows for financial and professional firms.",
         "products": [
             ("FastFund", "Family office", "Relationship management, portfolios and multijurisdiction tax intelligence."),
-            ("FastMSR", "Mortgage servicing", "Value, trade and transfer mortgage servicing rights."),
-            ("FastInsure", "Insurance claims", "AI-assisted comparison of claims and invoices against policy contracts."),
-            ("FastCRE", "Commercial real estate", "An AI deal squad for underwriting, closing and managing CRE assets."),
+            # FastInsure is Streamlit-based; re-enable after its landing/auth migration.
+            # ("FastInsure", "Insurance claims", "AI-assisted comparison of claims and invoices against policy contracts."),
         ],
     },
     {
@@ -57,9 +57,6 @@ GROUPS = [
         "description": "Purpose-built platforms for complex, regulated work.",
         "products": [
             ("FastClinic", "Clinic operations", "A multi-specialty operational back office for modern clinics."),
-            ("FastHealthData", "Health research data", "Research projects, metadata, access governance and cohort analytics."),
-            ("FastLCA", "Building carbon", "Whole-building lifecycle carbon assessment aligned with EN 15978."),
-            ("FastCity", "Connected operations", "Devices, telemetry, maps, alerts and an open sensor-ingestion API."),
         ],
     },
 ]
@@ -80,4 +77,30 @@ for product in PRODUCTS:
     if product["name"] == "FastInsure":
         product["url"] = "https://github.com/kaljuvee/insurance-demo"
 
-FEATURED = ["FastERP", "FastCRM", "FastInsights", "FastDrive", "FastClinic", "FastCRE"]
+LIVE_DEMOS = {
+    "FastFunnel": "https://funnel.fastsme.com",
+    "FastClinic": "https://clinic.fastsme.com",
+    "FastCMS": "https://cms.fastsme.com",
+    "FastCRM": "https://crm.fastsme.com",
+    "FastDocs": "https://docs.fastsme.com",
+    "FastDrive": "https://drive.fastsme.com",
+    "FastERP": "https://erp.fastsme.com",
+    "FastESM": "https://esm.fastsme.com",
+    "FastFund": "https://fund.fastsme.com",
+    "FastHelpdesk": "https://helpdesk.fastsme.com",
+    "FastHRM": "https://hrm.fastsme.com",
+    "FastInsights": "https://insights.fastsme.com",
+    # FastInsure is intentionally deferred until the Streamlit app is migrated.
+    # "FastInsure": "https://insure.fastsme.com",
+    "FastLMS": "https://lms.fastsme.com",
+    "FastMail": "https://mail.fastsme.com",
+    "FastMeet": "https://meet.fastsme.com",
+    "FastPPM": "https://ppm.fastsme.com",
+    "FastSheets": "https://sheets.fastsme.com",
+    "FastSlides": "https://slides.fastsme.com",
+}
+
+for product in PRODUCTS:
+    product["demo_url"] = LIVE_DEMOS.get(product["name"])
+
+FEATURED = ["FastFunnel", "FastERP", "FastCRM", "FastInsights", "FastDrive", "FastClinic"]

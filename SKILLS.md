@@ -2,7 +2,7 @@
 
 ## Product portfolio
 
-`content/products.py` contains 23 open-source Fast* products grouped into six practical categories. The same data powers the homepage featured cards and full `/products` catalog.
+`content/products.py` contains 18 migrated, live open-source Fast* products grouped into six practical categories. Each deployed card links to the live demo first and its GitHub repository second. Streamlit products stay commented until migrated.
 
 ## Client experience
 
