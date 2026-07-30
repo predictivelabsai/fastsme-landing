@@ -51,6 +51,7 @@ GROUPS = [
         "description": "Specialist workflows for financial and professional firms.",
         "products": [
             ("FastFund", "Family office", "Relationship management, portfolios and multijurisdiction tax intelligence."),
+            ("FastVC", "Venture capital", "Startup discovery, founder signals, round and ownership modelling, diligence, IC and portfolio support for venture investment teams."),
             # FastInsure is Streamlit-based; re-enable after its landing/auth migration.
             # ("FastInsure", "Insurance claims", "AI-assisted comparison of claims and invoices against policy contracts."),
         ],
@@ -59,6 +60,7 @@ GROUPS = [
         "name": "Industry operations",
         "description": "Purpose-built platforms for complex, regulated work.",
         "products": [
+            ("FastBooking", "Booking & commerce", "Multi-tenant bookings, reservations and inventory for restaurants, hotels, private clinics and ticketed events."),
             ("FastClinic", "Clinic operations", "A multi-specialty operational back office for modern clinics."),
         ],
     },
@@ -81,6 +83,7 @@ for product in PRODUCTS:
         product["url"] = "https://github.com/kaljuvee/insurance-demo"
 
 LIVE_DEMOS = {
+    "FastBooking": "https://booking.fastsme.com",
     "FastOffice": "https://fastoffice.org",
     "FastCal": "https://cal.fastsme.com",
     "FastFunnel": "https://funnel.fastsme.com",

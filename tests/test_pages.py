@@ -88,6 +88,9 @@ def test_product_catalogue_starts_with_fastoffice(server):
         assert cards.first.get_by_role("link", name="Open live demo").get_attribute("href") == "https://fastoffice.org"
         fastcal = cards.filter(has_text="FastCal")
         assert fastcal.get_by_role("link", name="Open live demo").get_attribute("href") == "https://cal.fastsme.com"
+        fastbooking = cards.filter(has_text="FastBooking")
+        assert fastbooking.get_by_role("link", name="Open live demo").get_attribute("href") == "https://booking.fastsme.com"
+        assert fastbooking.get_by_role("link", name="View on GitHub").get_attribute("href") == "https://github.com/predictivelabsai/FastBooking"
         browser.close()
 
 
