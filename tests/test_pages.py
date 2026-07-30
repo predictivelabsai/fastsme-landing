@@ -91,6 +91,17 @@ def test_product_catalogue_starts_with_fastoffice(server):
         browser.close()
 
 
+def test_advisory_board_includes_selahaddin_karatas(server):
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page(viewport={"width": 1440, "height": 900})
+        page.goto(server + "/team", wait_until="networkidle")
+        card = page.locator("article").filter(has_text="Selahaddin Karatas")
+        assert card.get_by_role("link", name="LinkedIn").get_attribute("href") == "https://www.linkedin.com/in/sekarsf/"
+        assert card.get_by_role("link", name="Website").get_attribute("href") == "https://saaspass.com"
+        browser.close()
+
+
 def test_health_and_legacy_redirect(server):
     import urllib.request
     assert b'"status":"ok"' in urllib.request.urlopen(server + "/healthz").read()

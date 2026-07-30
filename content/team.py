@@ -52,6 +52,14 @@ TEAM = [
 
 ADVISORY = [
     {
+        "name": "Selahaddin Karatas",
+        "role": "Advisor — Identity & Cybersecurity",
+        "bio": "San Francisco-based founder and CEO of SAASPASS, building passwordless identity and access management across MFA, single sign-on, password management, endpoints, cloud applications and enterprise infrastructure.",
+        "linkedin": "https://www.linkedin.com/in/sekarsf/",
+        "website": "https://saaspass.com",
+        "initials": "SK",
+    },
+    {
         "name": "Innar Liiv",
         "role": "Advisor — Data Science & e-Government",
         "bio": "Professor of Multidisciplinary Big Data and Associate Professor of Data Science at TalTech. His work spans data science, algorithmic governance and technology transfer.",

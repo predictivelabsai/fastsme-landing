@@ -224,10 +224,19 @@ def thesis():
 
 
 def _person_card(person):
+    links = [
+        A("LinkedIn →", href=person["linkedin"], target="_blank", rel="noopener",
+          cls="text-sm font-semibold text-forest hover:text-leaf"),
+    ]
+    if person.get("website"):
+        links.append(
+            A("Website ↗", href=person["website"], target="_blank", rel="noopener",
+              cls="text-sm font-semibold text-forest/70 hover:text-leaf"),
+        )
     return Article(
         Div(Span(person["initials"], cls="flex h-12 w-12 items-center justify-center rounded-2xl bg-mint text-sm font-bold text-forest"), Div(H3(person["name"], cls="font-display text-xl font-semibold"), P(person["role"], cls="mt-1 text-xs font-semibold text-leaf")), cls="flex items-center gap-4"),
         P(person["bio"], cls="mt-5 text-sm leading-6 text-muted"),
-        A("LinkedIn →", href=person["linkedin"], target="_blank", rel="noopener", cls="mt-5 inline-block text-sm font-semibold text-forest hover:text-leaf"),
+        Div(*links, cls="mt-5 flex flex-wrap gap-x-5 gap-y-2"),
         cls="rounded-3xl border border-line bg-white p-7",
     )
 

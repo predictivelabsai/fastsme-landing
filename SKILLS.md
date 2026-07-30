@@ -10,7 +10,7 @@
 
 ## Team
 
-`content/team.py` contains the seven-person core team and four-person advisory board. Both are rendered on `/team`.
+`content/team.py` contains the seven-person core team and five-person advisory board. Both are rendered on `/team`.
 
 ## SEO and operations
 
