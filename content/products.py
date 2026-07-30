@@ -32,6 +32,7 @@ GROUPS = [
         "description": "The operational backbone for finance, people and delivery.",
         "products": [
             ("FastERP", "ERP & accounting", "Sales, purchasing, stock, invoicing, receivables and a general ledger."),
+            ("FastFPA", "Financial planning & analysis", "Driver-based budgets, rolling forecasts, scenarios, full financial statements and variance analysis."),
             ("FastHRM", "People operations", "Employee records, leave, attendance, payroll and payslips."),
             ("FastPPM", "Projects & portfolios", "Conversational project and transformation-portfolio management."),
             ("FastCMS", "Content management", "Page trees, structured blocks, media, revisions and a headless API."),
@@ -89,6 +90,7 @@ LIVE_DEMOS = {
     "FastDocs": "https://docs.fastsme.com",
     "FastDrive": "https://drive.fastsme.com",
     "FastERP": "https://erp.fastsme.com",
+    "FastFPA": "https://fpa.fastsme.com",
     "FastESM": "https://esm.fastsme.com",
     "FastFund": "https://fund.fastsme.com",
     "FastHelpdesk": "https://helpdesk.fastsme.com",
@@ -107,4 +109,4 @@ LIVE_DEMOS = {
 for product in PRODUCTS:
     product["demo_url"] = LIVE_DEMOS.get(product["name"])
 
-FEATURED = ["FastFunnel", "FastERP", "FastCRM", "FastInsights", "FastDrive", "FastClinic"]
+FEATURED = ["FastFunnel", "FastERP", "FastFPA", "FastCRM", "FastInsights", "FastClinic"]
