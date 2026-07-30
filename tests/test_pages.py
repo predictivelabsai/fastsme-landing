@@ -78,6 +78,19 @@ def test_mobile_navigation(server):
         browser.close()
 
 
+def test_product_catalogue_starts_with_fastoffice(server):
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page(viewport={"width": 1440, "height": 900})
+        page.goto(server + "/products", wait_until="networkidle")
+        cards = page.locator("article")
+        assert cards.first.locator("h3").inner_text() == "FastOffice"
+        assert cards.first.get_by_role("link", name="Open live demo").get_attribute("href") == "https://fastoffice.org"
+        fastcal = cards.filter(has_text="FastCal")
+        assert fastcal.get_by_role("link", name="Open live demo").get_attribute("href") == "https://cal.fastsme.com"
+        browser.close()
+
+
 def test_health_and_legacy_redirect(server):
     import urllib.request
     assert b'"status":"ok"' in urllib.request.urlopen(server + "/healthz").read()

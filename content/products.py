@@ -4,6 +4,20 @@ GH = "https://github.com/predictivelabsai"
 
 GROUPS = [
     {
+        "name": "Work together",
+        "description": "An open productivity suite and everyday tools for focused teams.",
+        "products": [
+            ("FastOffice", "Productivity suite", "One open workspace for documents, spreadsheets, presentations, files, meetings, email, calendars, insights and AI assistance."),
+            ("FastCal", "Calendar & scheduling", "Organisation calendars, events, reminders, recurring schedules and conflict-safe public booking pages."),
+            ("FastMail", "Email", "Webmail with threaded reading, contacts and AI-assisted drafting."),
+            ("FastDrive", "Files", "File and folder management with sharing, permissions and activity history."),
+            ("FastDocs", "Documents", "A collaborative block editor with templates, versions and public sharing."),
+            ("FastSheets", "Spreadsheets", "A safe formula engine, computed workbooks and AI-assisted analysis."),
+            ("FastSlides", "Presentations", "Create, theme and present decks, including prompt-to-deck generation."),
+            ("FastMeet", "Meetings", "Scheduling, rooms, participants, agendas and meeting summaries."),
+        ],
+    },
+    {
         "name": "Sell & support",
         "description": "Find customers, manage relationships and keep service moving.",
         "products": [
@@ -21,18 +35,6 @@ GROUPS = [
             ("FastHRM", "People operations", "Employee records, leave, attendance, payroll and payslips."),
             ("FastPPM", "Projects & portfolios", "Conversational project and transformation-portfolio management."),
             ("FastCMS", "Content management", "Page trees, structured blocks, media, revisions and a headless API."),
-        ],
-    },
-    {
-        "name": "Work together",
-        "description": "Open everyday tools for focused teams.",
-        "products": [
-            ("FastMail", "Email", "Webmail with threaded reading, contacts and AI-assisted drafting."),
-            ("FastDrive", "Files", "File and folder management with sharing, permissions and activity history."),
-            ("FastDocs", "Documents", "A collaborative block editor with templates, versions and public sharing."),
-            ("FastSheets", "Spreadsheets", "A safe formula engine, computed workbooks and AI-assisted analysis."),
-            ("FastSlides", "Presentations", "Create, theme and present decks, including prompt-to-deck generation."),
-            ("FastMeet", "Meetings", "Scheduling, rooms, participants, agendas and meeting summaries."),
         ],
     },
     {
@@ -78,6 +80,8 @@ for product in PRODUCTS:
         product["url"] = "https://github.com/kaljuvee/insurance-demo"
 
 LIVE_DEMOS = {
+    "FastOffice": "https://fastoffice.org",
+    "FastCal": "https://cal.fastsme.com",
     "FastFunnel": "https://funnel.fastsme.com",
     "FastClinic": "https://clinic.fastsme.com",
     "FastCMS": "https://cms.fastsme.com",
