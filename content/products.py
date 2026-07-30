@@ -96,6 +96,7 @@ LIVE_DEMOS = {
     "FastFPA": "https://fpa.fastsme.com",
     "FastESM": "https://esm.fastsme.com",
     "FastFund": "https://fund.fastsme.com",
+    "FastVC": "https://vc.fastsme.com",
     "FastHelpdesk": "https://helpdesk.fastsme.com",
     "FastHRM": "https://hrm.fastsme.com",
     "FastInsights": "https://insights.fastsme.com",
