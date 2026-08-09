@@ -4,7 +4,7 @@ from datetime import datetime
 from fasthtml.common import (
     Html, Head, Body, Meta, Title, Link, Script, Style, NotStr,
     Nav, Main, Footer, Section, Article, Div, Span, A, H1, H2, H3, H4,
-    P, Ul, Li, Button, Strong,
+    P, Ul, Li, Button, Strong, Img,
 )
 
 SITE_NAME = "FastSME"
@@ -22,6 +22,7 @@ tailwind.config={theme:{extend:{colors:{
 NAV = [
     ("Products", "/products"),
     ("Clients", "/clients"),
+    ("Partners", "/partners"),
     ("Open source", "/open-source"),
     ("Thesis", "/thesis"),
     ("Team", "/team"),
@@ -67,6 +68,31 @@ def ProductCard(product):
         P(product["description"], cls="mt-3 text-sm leading-6 text-muted"),
         Div(*links, cls="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2"),
         cls="group rounded-3xl border border-line bg-paper p-6 shadow-[0_10px_35px_rgba(18,61,42,.05)] transition hover:-translate-y-1 hover:border-leaf/50",
+    )
+
+
+def PartnerCard(partner):
+    return Article(
+        Div(
+            Img(
+                src=partner["logo"],
+                alt=f'{partner["name"]} logo',
+                loading="lazy",
+                cls="h-12 w-12 object-contain",
+            ),
+            Span("Integration Partner", cls="rounded-full bg-mint px-3 py-1 text-xs font-semibold text-forest"),
+            cls="flex items-center justify-between gap-4",
+        ),
+        H3(partner["name"], cls="mt-6 font-display text-2xl font-semibold tracking-tight text-forest"),
+        P(partner["description"], cls="mt-3 text-sm leading-6 text-muted"),
+        A(
+            "Visit website ↗",
+            href=partner["url"],
+            target="_blank",
+            rel="noopener noreferrer",
+            cls="mt-6 inline-flex text-sm font-semibold text-leaf hover:text-forest",
+        ),
+        cls="rounded-3xl border border-line bg-white p-7 shadow-[0_10px_35px_rgba(18,61,42,.05)] transition hover:-translate-y-1 hover:border-leaf/50",
     )
 
 

@@ -41,6 +41,7 @@ See [DEPLOY.md](DEPLOY.md) for the Coolify and CI/CD setup.
 - `components.py` — shared layout and design system
 - `content/products.py` — grouped Fast* product portfolio
 - `content/clients.py` — selected client experience
+- `content/partners.py` — linked integration-partner profiles and logos
 - `content/team.py` — core team and advisory board
 - `static/` — CSS and favicon
 

@@ -8,6 +8,12 @@
 
 `content/clients.py` contains selected named engagements across technology, finance, industry, healthcare, retail, energy and real estate. Keep descriptions concise and exclude confidential details.
 
+## Integration partners
+
+`content/partners.py` contains the linked integration-partner profiles used by
+the Partners page and homepage band. Keep each profile grounded in the
+partner's public website and retain the `Integration Partner` label.
+
 ## Team
 
 `content/team.py` contains the seven-person core team and five-person advisory board. Both are rendered on `/team`.

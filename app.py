@@ -10,9 +10,10 @@ from starlette.responses import JSONResponse, RedirectResponse, PlainTextRespons
 from starlette.middleware.base import BaseHTTPMiddleware
 from fasthtml.common import fast_app, serve, Div, Span, A, P, Section, Article, H3, Strong, NotStr
 
-from components import page, Section_, Heading, Eyebrow, Button_, ProductCard, CONTACT_EMAIL
+from components import page, Section_, Heading, Eyebrow, Button_, ProductCard, PartnerCard, CONTACT_EMAIL
 from content.products import GROUPS, PRODUCTS, FEATURED
 from content.clients import CLIENTS
+from content.partners import PARTNERS
 from content.team import TEAM, ADVISORY
 
 app, rt = fast_app(static_path=".", secret_key=os.getenv("FASTSME_SESSION_SECRET", "fastsme-change-me"))
@@ -141,6 +142,14 @@ def home():
             Div(Button_("See client experience", "/clients", False), cls="mt-9"),
         ),
         Section_(
+            Eyebrow("Integration partners"),
+            Heading("Specialists who help the open suite connect and scale.", 2, "mt-4 max-w-4xl"),
+            P("FastSME works with identity, engineering and applied-AI partners who can support integrations and delivery.", cls="mt-5 max-w-3xl leading-7 text-muted"),
+            Div(*[PartnerCard(partner) for partner in PARTNERS], cls="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3"),
+            Div(Button_("Meet our partners", "/partners", False), cls="mt-10"),
+            cls="border-y border-line bg-mint/35",
+        ),
+        Section_(
             Div(
                 Div(Eyebrow("A better software bargain"), Heading("Your tools should compound your advantage — not your licence bill.", 2, "mt-4 max-w-4xl"), P("FastSME is building a durable open-source layer for the businesses that create most of the world's jobs, but are too often priced out of the best technology.", cls="mt-6 max-w-3xl text-lg leading-8 text-muted")),
                 Div(Button_("Read our thesis", "/thesis"), Button_(CONTACT_EMAIL, f"mailto:{CONTACT_EMAIL}", False), cls="mt-9 flex flex-wrap gap-3"),
@@ -174,6 +183,18 @@ def clients():
                 for name, sector, work in CLIENTS
             ], cls="grid gap-5 md:grid-cols-2 lg:grid-cols-3"),
             P("Selected client and professional experience of FastSME's owner and team. Descriptions are intentionally concise and exclude confidential details.", cls="mt-8 text-xs leading-5 text-muted"),
+        ),
+    )
+
+
+@rt("/partners")
+def partners():
+    return page(
+        "Partners", "/partners",
+        _intro("Integration partners", "Specialists who help FastSME connect and scale.", "Our integration partners bring identity, software delivery, data engineering and applied-AI expertise to FastSME implementations."),
+        Section_(
+            Div(*[PartnerCard(partner) for partner in PARTNERS], cls="grid gap-5 md:grid-cols-2 lg:grid-cols-3"),
+            P("Partner descriptions are based on each organisation's public profile. Follow the links for current services and capabilities.", cls="mt-8 text-xs leading-5 text-muted"),
         ),
     )
 
@@ -278,7 +299,7 @@ def robots():
 
 @rt("/sitemap.xml")
 def sitemap():
-    paths = ["", "/products", "/clients", "/open-source", "/thesis", "/team", "/contact"]
+    paths = ["", "/products", "/clients", "/partners", "/open-source", "/thesis", "/team", "/contact"]
     xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + "".join(f"<url><loc>https://fastsme.com{p}</loc></url>" for p in paths) + "</urlset>"
     return PlainTextResponse(xml, media_type="application/xml")
 
