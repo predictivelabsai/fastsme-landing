@@ -87,11 +87,12 @@ def test_partners_follow_clients_and_link_to_profiles(server):
         nav_labels = page.locator("nav ul").first.locator("a").all_inner_texts()
         assert nav_labels[nav_labels.index("Clients") + 1] == "Partners"
         cards = page.locator("main article")
-        assert cards.count() == 5
+        assert cards.count() == 6
         assert cards.filter(has_text="SAASPASS").get_by_role("img", name="SAASPASS logo").count() == 1
         assert cards.filter(has_text="SAASPASS").get_by_role("link", name="Visit website").get_attribute("href") == "https://saaspass.com/"
         assert cards.filter(has_text="Consistente").get_by_role("link", name="Visit website").get_attribute("href") == "https://consistente.tech/"
-        assert page.get_by_text("Integration Partner", exact=True).count() == 5
+        assert cards.filter(has_text="Manmouna Technologies").get_by_role("link", name="Visit website").get_attribute("href") == "https://manmouna.tech/"
+        assert page.get_by_text("Integration Partner", exact=True).count() == 6
         browser.close()
 
 
