@@ -87,7 +87,7 @@ LIVE_DEMOS = {
     "FastOffice": "https://fastoffice.org",
     "FastCal": "https://cal.fastsme.com",
     "FastFunnel": "https://funnel.fastsme.com",
-    "FastClinic": "https://clinic.fastsme.com",
+    "FastClinic": "https://fastclinic.dev",
     "FastCMS": "https://cms.fastsme.com",
     "FastCRM": "https://crm.fastsme.com",
     "FastDocs": "https://docs.fastsme.com",
