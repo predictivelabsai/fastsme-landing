@@ -25,6 +25,25 @@ python -m pytest tests/test_pages.py -v
 
 Browser artifacts are written to `output/playwright/`.
 
+## Languages
+
+The public site is available in English, Estonian, German, French, Swedish,
+Latvian, Norwegian, Danish, Polish, Dutch, Finnish and Lithuanian. The first
+visit follows the browser's supported language preference; a selection from
+the top navigation is stored in the signed session and preserves the current
+route.
+
+Checked-in catalogues live in `content/locales/`. Validate that every public
+source string is translated with:
+
+```bash
+python scripts/update_i18n.py
+```
+
+Maintainers can generate missing catalogue entries with `--translate`. This is
+an explicit maintenance command that sends only public English site copy to the
+translation service; deployed requests never call an external translator.
+
 ## Docker
 
 ```bash

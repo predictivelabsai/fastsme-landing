@@ -79,6 +79,72 @@ def test_mobile_navigation(server):
         browser.close()
 
 
+def test_language_dropdown_preserves_route_and_session(server):
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page(viewport={"width": 1440, "height": 900})
+        page.goto(server + "/products", wait_until="networkidle")
+        trigger = page.locator("#language-menu-button")
+        trigger.click()
+        menu = page.locator("#language-menu")
+        assert menu.is_visible()
+        estonian = menu.get_by_role("menuitem", name="Eesti")
+        assert estonian.get_attribute("href") == "/set-lang/et?next=/products"
+        estonian.click()
+        page.wait_for_url("**/products")
+        assert page.locator("html").get_attribute("lang") == "et"
+        assert "Tööriistad" in page.locator("h1").inner_text()
+        page.goto(server + "/team", wait_until="networkidle")
+        assert page.locator("html").get_attribute("lang") == "et"
+        trigger = page.locator("#language-menu-button")
+        trigger.click()
+        page.keyboard.press("Escape")
+        assert not page.locator("#language-menu").is_visible()
+        assert trigger.get_attribute("aria-expanded") == "false"
+        browser.close()
+
+
+def test_every_supported_language_renders_translated_products(server):
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        for lang in ("en", "et", "de", "fr", "sv", "lv", "no", "da", "pl", "nl", "fi", "lt"):
+            context = browser.new_context(locale="en-GB")
+            page = context.new_page()
+            page.goto(server + f"/set-lang/{lang}?next=/products", wait_until="networkidle")
+            assert page.url.endswith("/products")
+            assert page.locator("html").get_attribute("lang") == lang
+            assert page.locator("#language-menu [role=menuitem]").count() == 12
+            context.close()
+        browser.close()
+
+
+def test_language_return_path_rejects_external_redirects(server):
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page()
+        page.goto(server + "/set-lang/de?next=https://example.com", wait_until="networkidle")
+        assert page.url == server + "/"
+        assert page.locator("html").get_attribute("lang") == "de"
+        page.goto(server + "/set-lang/fr?next=/%255cexample.com", wait_until="networkidle")
+        assert page.url == server + "/"
+        browser.close()
+
+
+def test_language_and_sign_in_controls_fit_mobile_header(server):
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page(viewport={"width": 320, "height": 844})
+        page.goto(server + "/set-lang/fr?next=/", wait_until="networkidle")
+        language = page.locator("#language-menu-button")
+        sign_in = page.get_by_role("link", name="Se connecter", exact=True)
+        assert language.is_visible()
+        assert sign_in.is_visible()
+        for control in (language, sign_in):
+            box = control.bounding_box()
+            assert box and box["x"] >= 0 and box["x"] + box["width"] <= 320
+        browser.close()
+
+
 def test_partners_follow_clients_and_link_to_profiles(server):
     with sync_playwright() as pw:
         browser = pw.chromium.launch()

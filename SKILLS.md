@@ -21,6 +21,9 @@ partner's public website and retain the `Integration Partner` label.
 ## SEO and operations
 
 - Canonical metadata targets `fastsme.com`.
+- The full public surface supports 12 session-selected languages. Locale
+  catalogues are checked in under `content/locales/`, and
+  `python scripts/update_i18n.py` detects missing or stale copy.
 - `fastsme.org`, `www.fastsme.org` and `www.fastsme.com` redirect to the canonical host.
 - `/robots.txt` and `/sitemap.xml` are generated in the application.
 - `/healthz` supports Docker and Coolify health checks.
