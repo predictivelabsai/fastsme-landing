@@ -43,7 +43,7 @@ GROUPS = [
         "name": "Learn & understand",
         "description": "Turn business data and knowledge into decisions.",
         "products": [
-            ("FastInsights", "Business intelligence", "SQL, dashboards, Plotly charts and guarded text-to-SQL."),
+            ("FastBI", "Business intelligence", "SQL, dashboards, Plotly charts and guarded text-to-SQL."),
             ("FastLMS", "Learning management", "Courses, lessons, quizzes, AI tutoring and learner engagement."),
         ],
     },
@@ -101,7 +101,7 @@ LIVE_DEMOS = {
     "FastVC": "https://vc.fastsme.com",
     "FastHelpdesk": "https://helpdesk.fastsme.com",
     "FastHRM": "https://hrm.fastsme.com",
-    "FastInsights": "https://insights.fastsme.com",
+    "FastBI": "https://fastbi.org",
     # FastInsure is intentionally deferred until the Streamlit app is migrated.
     # "FastInsure": "https://insure.fastsme.com",
     "FastLMS": "https://lms.fastsme.com",
@@ -115,4 +115,4 @@ LIVE_DEMOS = {
 for product in PRODUCTS:
     product["demo_url"] = LIVE_DEMOS.get(product["name"])
 
-FEATURED = ["FastFunnel", "FastERP", "FastFPA", "FastCRM", "FastInsights", "FastClinic"]
+FEATURED = ["FastFunnel", "FastERP", "FastFPA", "FastCRM", "FastBI", "FastClinic"]
