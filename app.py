@@ -117,7 +117,7 @@ def home(sess, request):
                     Eyebrow(T("Open source · affordable · globally useful")),
                     Heading(T("Big-company capability. Small-business economics."), 1, "mt-6 max-w-5xl"),
                     P(T("FastSME brings the software capabilities of large enterprises to SMEs and SMBs worldwide — as practical open-source products that are affordable to adopt, own and extend."), cls="mt-7 max-w-3xl text-lg leading-8 text-muted md:text-xl"),
-                    Div(Button_("Explore 23 open-source products", "/products", lang=lang), Button_("Talk to the team", "/contact", False, lang), cls="mt-9 flex flex-wrap gap-3"),
+                    Div(Button_("Explore 24 open-source products", "/products", lang=lang), Button_("Talk to the team", "/contact", False, lang), cls="mt-9 flex flex-wrap gap-3"),
                     cls="relative z-10",
                 ),
                 Div(
@@ -194,7 +194,7 @@ def products(sess, request):
             Div(*[ProductCard(p, lang) for p in group_products], cls="grid gap-5 md:grid-cols-2 lg:grid-cols-3"),
             cls="border-t border-line first:border-0",
         ))
-    return page("Products", "/products", _intro(T("23 open-source products · one open platform"), T("Tools for every stage of running a business."), T("From first customer to complex operations, FastSME gives smaller businesses a practical route to software normally reserved for large enterprises.")), *sections, lang=lang)
+    return page("Products", "/products", _intro(T("24 open-source products · one open platform"), T("Tools for every stage of running a business."), T("From first customer to complex operations, FastSME gives smaller businesses a practical route to software normally reserved for large enterprises.")), *sections, lang=lang)
 
 
 @rt("/clients")

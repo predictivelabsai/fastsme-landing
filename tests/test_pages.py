@@ -175,6 +175,9 @@ def test_product_catalogue_starts_with_fastoffice(server):
         fastbooking = cards.filter(has_text="FastBooking")
         assert fastbooking.get_by_role("link", name="Open live demo").get_attribute("href") == "https://booking.fastsme.com"
         assert fastbooking.get_by_role("link", name="View on GitHub").get_attribute("href") == "https://github.com/predictivelabsai/FastBooking"
+        fastaccounts = cards.filter(has_text="FastAccounts")
+        assert fastaccounts.get_by_role("link", name="Open live demo").get_attribute("href") == "https://fastaccounts.org"
+        assert fastaccounts.get_by_role("link", name="View on GitHub").get_attribute("href") == "https://github.com/predictivelabsai/FastAccounts"
         browser.close()
 
 

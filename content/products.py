@@ -31,6 +31,7 @@ GROUPS = [
         "name": "Run the business",
         "description": "The operational backbone for finance, people and delivery.",
         "products": [
+            ("FastAccounts", "Bookkeeping & accounting", "Invoices, bills, reconciliation, double-entry bookkeeping, financial reports and accountant-reviewed UK and Estonian tax workpapers."),
             ("FastERP", "ERP & accounting", "Sales, purchasing, stock, invoicing, receivables and a general ledger."),
             ("FastFPA", "Financial planning & analysis", "Driver-based budgets, rolling forecasts, scenarios, full financial statements and variance analysis."),
             ("FastHRM", "People operations", "Employee records, leave, attendance, payroll and payslips."),
@@ -83,6 +84,7 @@ for product in PRODUCTS:
         product["url"] = "https://github.com/kaljuvee/insurance-demo"
 
 LIVE_DEMOS = {
+    "FastAccounts": "https://fastaccounts.org",
     "FastBooking": "https://booking.fastsme.com",
     "FastOffice": "https://fastoffice.org",
     "FastCal": "https://cal.fastsme.com",
