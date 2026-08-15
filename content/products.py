@@ -24,6 +24,7 @@ GROUPS = [
             ("FastFunnel", "Autonomous marketing", "Plan, create, review, schedule and measure marketing through a bounded AI agency."),
             ("FastCRM", "Sales CRM", "Leads, contacts, activities and a visual deal pipeline."),
             ("FastHelpdesk", "Customer support", "Tickets, teams, knowledge base and live SLA tracking."),
+            ("FastVoice", "Voice automation", "Design, test and operate open voice agents with visual workflows, browser calls, telephony and bring-your-own AI providers."),
             ("FastESM", "Service management", "A service catalogue, workflows, requests, SLAs and role-based access."),
         ],
     },
@@ -100,6 +101,7 @@ LIVE_DEMOS = {
     "FastFund": "https://fund.fastsme.com",
     "FastVC": "https://vc.fastsme.com",
     "FastHelpdesk": "https://helpdesk.fastsme.com",
+    "FastVoice": "https://voice.fastsme.com",
     "FastHRM": "https://hrm.fastsme.com",
     "FastBI": "https://fastbi.org",
     # FastInsure is intentionally deferred until the Streamlit app is migrated.
