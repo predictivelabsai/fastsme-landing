@@ -31,7 +31,7 @@ Primary routes are `/`, `/products`, `/clients`, `/open-source`, `/thesis`, `/te
 - Legal entity: Exroad Fintech Ltd, trading as FastSME, company number 11914994
 - Position around SMEs/SMBs globally, open source, accessible economics and enterprise-grade capability.
 - Keep positioning exclusively focused on SMEs, SMBs and their technology partners.
-- Keep the full portfolio data-driven and grouped around business jobs.
+- Keep the 29-product portfolio data-driven, grouped around business jobs and filterable without hiding its server-rendered content from crawlers.
 
 ## Deployment
 

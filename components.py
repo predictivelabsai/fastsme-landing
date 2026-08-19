@@ -43,8 +43,8 @@ def Eyebrow(text):
     return Span(text, cls="text-xs font-semibold uppercase tracking-[.18em] text-leaf")
 
 
-def Section_(*children, cls=""):
-    return Section(Div(*children, cls="mx-auto max-w-7xl px-5 md:px-8"), cls=f"py-16 md:py-24 {cls}")
+def Section_(*children, cls="", **attrs):
+    return Section(Div(*children, cls="mx-auto max-w-7xl px-5 md:px-8"), cls=f"py-16 md:py-24 {cls}", **attrs)
 
 
 def Heading(text, level=2, cls=""):
@@ -60,6 +60,12 @@ def ProductCard(product, lang="en"):
                        rel="noopener", cls="text-sm font-semibold text-leaf hover:text-forest"))
     links.append(A(t("View on GitHub ↗", lang), href=product["url"], target="_blank", rel="noopener",
                    cls="text-sm font-semibold text-forest/70 hover:text-leaf"))
+    search_text = " ".join((
+        product["name"],
+        t(product["label"], lang),
+        t(product["description"], lang),
+        t(product["category"], lang),
+    )).lower()
     return Article(
         Div(
             Span(t(product["label"], lang), cls="rounded-full bg-mint px-3 py-1 text-xs font-semibold text-forest"),
@@ -69,7 +75,9 @@ def ProductCard(product, lang="en"):
         H3(product["name"], cls="mt-6 font-display text-2xl font-semibold tracking-tight text-forest"),
         P(t(product["description"], lang), cls="mt-3 text-sm leading-6 text-muted"),
         Div(*links, cls="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2"),
-        cls="group rounded-3xl border border-line bg-paper p-6 shadow-[0_10px_35px_rgba(18,61,42,.05)] transition hover:-translate-y-1 hover:border-leaf/50",
+        cls="product-card group rounded-3xl border border-line bg-paper p-6 shadow-[0_10px_35px_rgba(18,61,42,.05)] transition hover:-translate-y-1 hover:border-leaf/50",
+        data_category=product["category_id"],
+        data_search=search_text,
     )
 
 
@@ -241,6 +249,34 @@ def page(title, current, *content, description=None, signed_in=False, lang="en")
                     menu.classList.toggle('hidden');
                     button.setAttribute('aria-expanded', opening ? 'true' : 'false');
                     if (opening) menu.querySelector('a').focus();
+                }
+                let activeProductCategory = 'all';
+                function filterProducts() {
+                    const search = (document.getElementById('product-search')?.value || '').trim().toLowerCase();
+                    let visible = 0;
+                    document.querySelectorAll('.product-card').forEach(function(card) {
+                        const categoryMatch = activeProductCategory === 'all' || card.dataset.category === activeProductCategory;
+                        const searchMatch = !search || card.dataset.search.includes(search);
+                        const show = categoryMatch && searchMatch;
+                        card.hidden = !show;
+                        if (show) visible += 1;
+                    });
+                    document.querySelectorAll('.product-group').forEach(function(group) {
+                        group.hidden = !group.querySelector('.product-card:not([hidden])');
+                    });
+                    const count = document.getElementById('product-result-count');
+                    if (count) count.textContent = visible;
+                    const empty = document.getElementById('product-empty');
+                    if (empty) empty.hidden = visible !== 0;
+                }
+                function setProductCategory(category, button) {
+                    activeProductCategory = category;
+                    document.querySelectorAll('.product-filter').forEach(function(item) {
+                        const active = item === button;
+                        item.setAttribute('aria-pressed', active ? 'true' : 'false');
+                        item.classList.toggle('product-filter-active', active);
+                    });
+                    filterProducts();
                 }
                 document.addEventListener('click', closeLanguageMenu);
                 document.addEventListener('keydown', function(event) {

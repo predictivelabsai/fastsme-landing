@@ -169,15 +169,49 @@ def test_product_catalogue_starts_with_fastoffice(server):
         page.goto(server + "/products", wait_until="networkidle")
         cards = page.locator("article")
         assert cards.first.locator("h3").inner_text() == "FastOffice"
-        assert cards.first.get_by_role("link", name="Open live demo").get_attribute("href") == "https://fastoffice.org"
+        assert cards.count() == 29
+        assert cards.first.get_by_role("link", name="Open live demo").get_attribute("href") == "https://office.fastsme.com"
         fastcal = cards.filter(has_text="FastCal")
         assert fastcal.get_by_role("link", name="Open live demo").get_attribute("href") == "https://cal.fastsme.com"
         fastbooking = cards.filter(has_text="FastBooking")
         assert fastbooking.get_by_role("link", name="Open live demo").get_attribute("href") == "https://booking.fastsme.com"
         assert fastbooking.get_by_role("link", name="View on GitHub").get_attribute("href") == "https://github.com/predictivelabsai/FastBooking"
-        fastaccounts = cards.filter(has_text="FastAccounts")
-        assert fastaccounts.get_by_role("link", name="Open live demo").get_attribute("href") == "https://fastaccounts.org"
-        assert fastaccounts.get_by_role("link", name="View on GitHub").get_attribute("href") == "https://github.com/predictivelabsai/FastAccounts"
+        assert cards.filter(has_text="FastAccounts").count() == 0
+        for product in ("FastFactoring", "FastPE", "FastDataGov", "FastSocial", "FastSSO"):
+            assert cards.filter(has_text=product).count() == 1
+        browser.close()
+
+
+def test_product_filters_and_search(server):
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page(viewport={"width": 1440, "height": 900})
+        page.goto(server + "/products", wait_until="networkidle")
+        cards = page.locator("article.product-card")
+        page.get_by_role("button", name="Finance & investment").click()
+        assert page.locator("#product-result-count").inner_text() == "4"
+        assert cards.filter(has_text="FastVC").is_visible()
+        assert not cards.filter(has_text="FastClinic").is_visible()
+        page.locator("#product-search").fill("invoice")
+        assert page.locator("#product-result-count").inner_text() == "1"
+        assert cards.filter(has_text="FastFactoring").is_visible()
+        page.get_by_role("button", name="All products").click()
+        page.locator("#product-search").fill("identity")
+        assert page.locator("#product-result-count").inner_text() == "1"
+        assert cards.filter(has_text="FastSSO").is_visible()
+        browser.close()
+
+
+def test_product_filters_fit_mobile_without_page_overflow(server):
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page(viewport={"width": 390, "height": 844})
+        page.goto(server + "/products", wait_until="networkidle")
+        assert page.evaluate("document.documentElement.scrollWidth") == 390
+        page.get_by_role("button", name="Booking & care").click()
+        assert page.locator("#product-result-count").inner_text() == "2"
+        assert page.locator("article.product-card:visible").count() == 2
+        page.screenshot(path=str(OUTPUT / "products-mobile-filtered.png"), full_page=True)
         browser.close()
 
 

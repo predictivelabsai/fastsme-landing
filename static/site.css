@@ -3,6 +3,20 @@ html { scroll-behavior: smooth; background: #f7fcf7; }
 body { margin: 0; min-width: 320px; overflow-x: hidden; }
 ::selection { background: #bdf27b; color: #09281b; }
 a, button { -webkit-tap-highlight-color: transparent; }
+.product-filter {
+  flex: 0 0 auto;
+  border: 1px solid #d8e9dc;
+  border-radius: 9999px;
+  background: #fff;
+  padding: .65rem 1rem;
+  color: #587064;
+  font-size: .875rem;
+  font-weight: 600;
+  transition: border-color .2s, background-color .2s, color .2s;
+}
+.product-filter:hover { border-color: #36a269; color: #123d2a; }
+.product-filter-active { border-color: #123d2a; background: #123d2a; color: #fff; }
+.product-card[hidden], .product-group[hidden], #product-empty[hidden] { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: 0.01ms !important; }

@@ -8,7 +8,7 @@ from urllib.request import Request as UrlRequest, urlopen
 from starlette.requests import Request
 from starlette.responses import JSONResponse, RedirectResponse, PlainTextResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from fasthtml.common import fast_app, serve, Div, Span, A, P, Section, Article, H3, Strong, NotStr
+from fasthtml.common import fast_app, serve, Div, Span, A, P, Section, Article, H3, Strong, NotStr, Button, Input
 
 from components import page, Section_, Heading, Eyebrow, Button_, ProductCard, PartnerCard, CONTACT_EMAIL
 from content.products import GROUPS, PRODUCTS, FEATURED
@@ -117,7 +117,7 @@ def home(sess, request):
                     Eyebrow(T("Open source · affordable · globally useful")),
                     Heading(T("Big-company capability. Small-business economics."), 1, "mt-6 max-w-5xl"),
                     P(T("FastSME brings the software capabilities of large enterprises to SMEs and SMBs worldwide — as practical open-source products that are affordable to adopt, own and extend."), cls="mt-7 max-w-3xl text-lg leading-8 text-muted md:text-xl"),
-                    Div(Button_("Explore 24 open-source products", "/products", lang=lang), Button_("Talk to the team", "/contact", False, lang), cls="mt-9 flex flex-wrap gap-3"),
+                    Div(Button_("Explore 29 open-source products", "/products", lang=lang), Button_("Talk to the team", "/contact", False, lang), cls="mt-9 flex flex-wrap gap-3"),
                     cls="relative z-10",
                 ),
                 Div(
@@ -192,9 +192,41 @@ def products(sess, request):
         sections.append(Section_(
             Div(Eyebrow(T(group["name"])), Heading(T(group["name"]), 2, "mt-3"), P(T(group["description"]), cls="mt-4 text-muted"), cls="mb-10"),
             Div(*[ProductCard(p, lang) for p in group_products], cls="grid gap-5 md:grid-cols-2 lg:grid-cols-3"),
-            cls="border-t border-line first:border-0",
+            cls="product-group border-t border-line first:border-0",
+            data_category=group["filter"],
         ))
-    return page("Products", "/products", _intro(T("24 open-source products · one open platform"), T("Tools for every stage of running a business."), T("From first customer to complex operations, FastSME gives smaller businesses a practical route to software normally reserved for large enterprises.")), *sections, lang=lang)
+    filters = Section_(
+        Div(
+            Div(
+                P(T("Find the right starting point"), cls="font-display text-xl font-semibold text-forest"),
+                P(T("Search by product, capability or business need."), cls="mt-1 text-sm text-muted"),
+            ),
+            Div(
+                Input(
+                    type="search",
+                    id="product-search",
+                    placeholder=T("Search 29 products"),
+                    aria_label=T("Search products"),
+                    oninput="filterProducts()",
+                    cls="w-full rounded-full border border-line bg-white px-5 py-3 text-sm text-forest outline-none transition placeholder:text-muted/70 focus:border-leaf focus:ring-4 focus:ring-mint md:w-80",
+                ),
+                Div(Span(str(len(PRODUCTS)), id="product-result-count", cls="font-semibold text-forest"), " ", T("products shown"), cls="whitespace-nowrap text-sm text-muted", aria_live="polite"),
+                cls="flex flex-col gap-3 sm:flex-row sm:items-center",
+            ),
+            cls="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between",
+        ),
+        Div(
+            Button(T("All products"), type="button", onclick="setProductCategory('all', this)", aria_pressed="true", cls="product-filter product-filter-active"),
+            *[
+                Button(T(group["name"]), type="button", onclick=f"setProductCategory('{group['filter']}', this)", aria_pressed="false", cls="product-filter")
+                for group in GROUPS
+            ],
+            cls="mt-7 flex gap-2 overflow-x-auto pb-2",
+        ),
+        P(T("No products match those filters."), id="product-empty", hidden=True, cls="mt-8 rounded-2xl border border-line bg-white p-6 text-sm text-muted"),
+        cls="border-y border-line bg-mint/30 py-8 md:py-10",
+    )
+    return page("Products", "/products", _intro(T("29 open-source products · one open platform"), T("Tools for every stage of running a business."), T("From first customer to complex operations, FastSME gives smaller businesses a practical route to software normally reserved for large enterprises.")), filters, *sections, lang=lang)
 
 
 @rt("/clients")
