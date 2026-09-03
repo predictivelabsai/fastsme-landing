@@ -169,7 +169,7 @@ def test_product_catalogue_starts_with_fastoffice(server):
         page.goto(server + "/products", wait_until="networkidle")
         cards = page.locator("article")
         assert cards.first.locator("h3").inner_text() == "FastOffice"
-        assert cards.count() == 29
+        assert cards.count() == 30
         assert cards.first.get_by_role("link", name="Open live demo").get_attribute("href") == "https://office.fastsme.com"
         fastcal = cards.filter(has_text="FastCal")
         assert fastcal.get_by_role("link", name="Open live demo").get_attribute("href") == "https://cal.fastsme.com"
@@ -179,6 +179,9 @@ def test_product_catalogue_starts_with_fastoffice(server):
         assert cards.filter(has_text="FastAccounts").count() == 0
         for product in ("FastFactoring", "FastPE", "FastDataGov", "FastSocial", "FastSSO"):
             assert cards.filter(has_text=product).count() == 1
+        fastdps = cards.filter(has_text="FastDPS")
+        assert fastdps.get_by_role("link", name="Open live demo").get_attribute("href") == "https://dps.fastsme.com"
+        assert fastdps.get_by_role("link", name="View on GitHub").get_attribute("href") == "https://github.com/predictivelabsai/FastDPS"
         browser.close()
 
 
