@@ -117,7 +117,7 @@ def home(sess, request):
                     Eyebrow(T("Open source · affordable · globally useful")),
                     Heading(T("Big-company capability. Small-business economics."), 1, "mt-6 max-w-5xl"),
                     P(T("FastSME brings the software capabilities of large enterprises to SMEs and SMBs worldwide — as practical open-source products that are affordable to adopt, own and extend."), cls="mt-7 max-w-3xl text-lg leading-8 text-muted md:text-xl"),
-                    Div(Button_("Explore 29 open-source products", "/products", lang=lang), Button_("Talk to the team", "/contact", False, lang), cls="mt-9 flex flex-wrap gap-3"),
+                    Div(Button_("Explore 31 open-source products", "/products", lang=lang), Button_("Talk to the team", "/contact", False, lang), cls="mt-9 flex flex-wrap gap-3"),
                     cls="relative z-10",
                 ),
                 Div(
@@ -205,7 +205,7 @@ def products(sess, request):
                 Input(
                     type="search",
                     id="product-search",
-                    placeholder=T("Search 29 products"),
+                    placeholder=T("Search 31 products"),
                     aria_label=T("Search products"),
                     oninput="filterProducts()",
                     cls="w-full rounded-full border border-line bg-white px-5 py-3 text-sm text-forest outline-none transition placeholder:text-muted/70 focus:border-leaf focus:ring-4 focus:ring-mint md:w-80",
@@ -226,7 +226,7 @@ def products(sess, request):
         P(T("No products match those filters."), id="product-empty", hidden=True, cls="mt-8 rounded-2xl border border-line bg-white p-6 text-sm text-muted"),
         cls="border-y border-line bg-mint/30 py-8 md:py-10",
     )
-    return page("Products", "/products", _intro(T("29 open-source products · one open platform"), T("Tools for every stage of running a business."), T("From first customer to complex operations, FastSME gives smaller businesses a practical route to software normally reserved for large enterprises.")), filters, *sections, lang=lang)
+    return page("Products", "/products", _intro(T("31 open-source products · one open platform"), T("Tools for every stage of running a business."), T("From first customer to complex operations, FastSME gives smaller businesses a practical route to software normally reserved for large enterprises.")), filters, *sections, lang=lang)
 
 
 @rt("/clients")

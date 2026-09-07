@@ -38,6 +38,7 @@ GROUPS = [
         "products": [
             ("FastERP", "ERP & accounting", "Order-to-cash, procure-to-stock, inventory, accounting and AI-assisted operations."),
             ("FastDPS", "Dynamic procurement", "Create dynamic purchasing systems, continuously qualify suppliers, run call-off competitions and keep every decision auditable."),
+            ("FastCLM", "Contract lifecycle management", "Upload, review, approve, sign and manage contract versions, obligations, renewals and notice dates."),
             ("FastFPA", "Financial planning & analysis", "Driver-based budgets, rolling forecasts, scenarios, integrated statements and variance analysis."),
             ("FastHRM", "People operations", "Employee records, departments, leave, attendance, payroll and payslips."),
             ("FastPPM", "Projects & portfolios", "Document ingestion, canonical project data, Gantt planning, value tracking, dashboards and an AI analyst."),
@@ -99,6 +100,7 @@ LIVE_DEMOS = {
     "FastDrive": "https://drive.fastsme.com",
     "FastERP": "https://erp.fastsme.com",
     "FastDPS": "https://dps.fastsme.com",
+    "FastCLM": "https://clm.fastsme.com",
     "FastESM": "https://esm.fastsme.com",
     "FastFund": "https://fund.fastsme.com",
     "FastHelpdesk": "https://helpdesk.fastsme.com",
