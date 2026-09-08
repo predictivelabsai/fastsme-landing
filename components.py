@@ -23,6 +23,7 @@ tailwind.config={theme:{extend:{colors:{
 
 NAV = [
     ("Products", "/products"),
+    ("Pricing", "/pricing"),
     ("Clients", "/clients"),
     ("Partners", "/partners"),
     ("Open source", "/open-source"),
