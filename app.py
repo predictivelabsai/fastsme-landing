@@ -8,7 +8,7 @@ from urllib.request import Request as UrlRequest, urlopen
 from starlette.requests import Request
 from starlette.responses import JSONResponse, RedirectResponse, PlainTextResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from fasthtml.common import fast_app, serve, Div, Span, A, P, Section, Article, H3, Strong, NotStr, Button, Input
+from fasthtml.common import fast_app, serve, Div, Span, A, P, Section, Article, H2, H3, Strong, NotStr, Button, Input, Ul, Li
 
 from components import page, Section_, Heading, Eyebrow, Button_, ProductCard, PartnerCard, CONTACT_EMAIL
 from content.products import GROUPS, PRODUCTS, FEATURED
@@ -117,7 +117,7 @@ def home(sess, request):
                     Eyebrow(T("Open source · affordable · globally useful")),
                     Heading(T("Big-company capability. Small-business economics."), 1, "mt-6 max-w-5xl"),
                     P(T("FastSME brings the software capabilities of large enterprises to SMEs and SMBs worldwide — as practical open-source products that are affordable to adopt, own and extend."), cls="mt-7 max-w-3xl text-lg leading-8 text-muted md:text-xl"),
-                    Div(Button_("Explore 31 open-source products", "/products", lang=lang), Button_("Talk to the team", "/contact", False, lang), cls="mt-9 flex flex-wrap gap-3"),
+                    Div(Button_("Explore 46 open-source products", "/products", lang=lang), Button_("Talk to the team", "/contact", False, lang), cls="mt-9 flex flex-wrap gap-3"),
                     cls="relative z-10",
                 ),
                 Div(
@@ -205,7 +205,7 @@ def products(sess, request):
                 Input(
                     type="search",
                     id="product-search",
-                    placeholder=T("Search 31 products"),
+                    placeholder=T("Search 46 products"),
                     aria_label=T("Search products"),
                     oninput="filterProducts()",
                     cls="w-full rounded-full border border-line bg-white px-5 py-3 text-sm text-forest outline-none transition placeholder:text-muted/70 focus:border-leaf focus:ring-4 focus:ring-mint md:w-80",
@@ -226,8 +226,69 @@ def products(sess, request):
         P(T("No products match those filters."), id="product-empty", hidden=True, cls="mt-8 rounded-2xl border border-line bg-white p-6 text-sm text-muted"),
         cls="border-y border-line bg-mint/30 py-8 md:py-10",
     )
-    return page("Products", "/products", _intro(T("31 open-source products · one open platform"), T("Tools for every stage of running a business."), T("From first customer to complex operations, FastSME gives smaller businesses a practical route to software normally reserved for large enterprises.")), filters, *sections, lang=lang)
+    return page("Products", "/products", _intro(T("46 open-source products · one open platform"), T("Tools for every stage of running a business."), T("From first customer to complex operations, FastSME gives smaller businesses a practical route to software normally reserved for large enterprises.")), filters, *sections, lang=lang)
 
+
+
+
+@rt("/pricing")
+def pricing(sess, request):
+    lang = get_lang(sess, request)
+    T = lambda text: t(text, lang)
+    plans = [
+        (
+            "BYOC",
+            "Bring Your Own Cloud",
+            "Free",
+            "Self-host any FastSME product on your own infrastructure or cloud account. Keep full control of data, networking and upgrades.",
+            [
+                "Self-hosted deployment",
+                "Your cloud, your VPC, your keys",
+                "Open-source code you can inspect and extend",
+                "No per-seat platform fee",
+            ],
+        ),
+        (
+            "Hosted",
+            "Host with us",
+            "€1 / month",
+            "We run the product for you on FastSME-managed infrastructure — simple, predictable pricing for every Fast* app.",
+            [
+                "Managed hosting and updates",
+                "€1 per product per month",
+                "Same open-source products as BYOC",
+                "Start fast without operating the stack",
+            ],
+        ),
+    ]
+    cards = []
+    for eyebrow, title, price, blurb, bullets in plans:
+        cards.append(
+            Article(
+                Span(T(eyebrow), cls="text-xs font-semibold uppercase tracking-[.18em] text-leaf"),
+                H2(T(title), cls="mt-4 font-display text-3xl font-semibold tracking-tight text-forest"),
+                P(T(price), cls="mt-6 font-display text-4xl font-bold text-forest"),
+                P(T(blurb), cls="mt-4 text-sm leading-6 text-muted"),
+                Ul(*[Li(T(item), cls="text-sm leading-6 text-forest") for item in bullets], cls="mt-8 list-disc space-y-2 pl-5"),
+                Div(Button_("Talk to the team", "/contact", True, lang), cls="mt-10"),
+                cls="rounded-[2rem] border border-line bg-white p-8 md:p-10",
+            )
+        )
+    return page(
+        "Pricing",
+        "/pricing",
+        _intro(
+            T("Pricing"),
+            T("Simple pricing for every FastSME product."),
+            T("Every Fast* product uses the same two options: bring your own cloud for free, or host with us for €1 per month."),
+        ),
+        Section_(
+            Div(*cards, cls="grid gap-6 lg:grid-cols-2"),
+            P(T("Pricing applies to each FastSME product. Contact us if you need multi-product hosting, implementation help or a private deployment."), cls="mt-8 text-sm leading-6 text-muted"),
+            Div(Button_("Explore products", "/products", False, lang), cls="mt-8"),
+        ),
+        lang=lang,
+    )
 
 @rt("/clients")
 def clients(sess, request):
@@ -374,7 +435,7 @@ def robots():
 
 @rt("/sitemap.xml")
 def sitemap():
-    paths = ["", "/products", "/clients", "/partners", "/open-source", "/thesis", "/team", "/contact"]
+    paths = ["", "/products", "/pricing", "/clients", "/partners", "/open-source", "/thesis", "/team", "/contact"]
     xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + "".join(f"<url><loc>https://fastsme.com{p}</loc></url>" for p in paths) + "</urlset>"
     return PlainTextResponse(xml, media_type="application/xml")
 

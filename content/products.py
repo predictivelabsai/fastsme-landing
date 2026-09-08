@@ -16,6 +16,7 @@ GROUPS = [
             ("FastSheets", "Spreadsheets", "An editable grid with a real formula engine, multiple sheets and AI-assisted analysis."),
             ("FastSlides", "Presentations", "Create, theme and present decks, including prompt-to-deck generation."),
             ("FastMeet", "Meetings", "Scheduling, rooms, participants, agendas and AI-generated meeting summaries."),
+            ("FastWiki", "Knowledge workspace", "A Confluence-style wiki with rich editing, search, history, comments, attachments and FastOffice suite links."),
         ],
     },
     {
@@ -24,10 +25,15 @@ GROUPS = [
         "description": "Find customers, build relationships and keep every service channel moving.",
         "products": [
             ("FastFunnel", "Autonomous marketing", "Plan, create, approve, distribute and measure marketing within explicit publishing and spend guardrails."),
+            ("FastGTM", "Go-to-market", "Plan campaigns, messaging and launch workflows so product, marketing and sales stay aligned."),
             ("FastCRM", "Sales CRM", "Leads, contacts, organisations, activities and a visual deal pipeline."),
+            ("FastATS", "Applicant tracking", "Recruiter-first hiring with AI screening that scores and explains — humans keep every state change."),
             ("FastHelpdesk", "Customer support", "Ticket queues, conversations, teams, customers, knowledge base and live SLA tracking."),
             ("FastVoice", "Voice automation", "Design and operate self-hosted voice agents with visual workflows, telephony, tools, APIs and MCP."),
             ("FastSocial", "Social media management", "Multi-brand publishing, scheduling, content reuse, performance insights, inboxes, ads and listening."),
+            ("FastBot", "AI coworkers", "Governed AI coworkers with durable channels, visible activity, policy boundaries and a full audit trail."),
+            ("FastSurvey", "Conversational research", "Chat-first survey design, adaptive interviews, structured extraction and evidence-backed synthesis."),
+            ("FastCDP", "Customer data platform", "Unify customer profiles, events and audiences so growth and service teams share one governed view."),
             ("FastESM", "Service management", "A cross-department service catalogue with requests, approvals, workflows, RBAC, SLAs and a knowledge base."),
         ],
     },
@@ -37,14 +43,18 @@ GROUPS = [
         "description": "The operational backbone for finance, people, delivery, content, data and identity.",
         "products": [
             ("FastERP", "ERP & accounting", "Order-to-cash, procure-to-stock, inventory, accounting and AI-assisted operations."),
+            ("FastAccounts", "Bookkeeping", "UK and Estonian bookkeeping for invoices, bills, payments, double-entry ledgers and VAT/KMD workpapers — deliberately not an ERP."),
             ("FastDPS", "Dynamic procurement", "Create dynamic purchasing systems, continuously qualify suppliers, run call-off competitions and keep every decision auditable."),
             ("FastCLM", "Contract lifecycle management", "Upload, review, approve, sign and manage contract versions, obligations, renewals and notice dates."),
+            ("FastLegal", "Legal analysis", "AI-powered legal document analysis for review, extraction and grounded answers over your matter files."),
             ("FastFPA", "Financial planning & analysis", "Driver-based budgets, rolling forecasts, scenarios, integrated statements and variance analysis."),
             ("FastHRM", "People operations", "Employee records, departments, leave, attendance, payroll and payslips."),
             ("FastPPM", "Projects & portfolios", "Document ingestion, canonical project data, Gantt planning, value tracking, dashboards and an AI analyst."),
             ("FastCMS", "Content management", "Page trees, rich content blocks, media, workflows, revisions, search, forms and a headless API."),
             ("FastDataGov", "Data governance", "A searchable catalogue, glossary, lineage, data quality, stewardship, certification and access requests."),
             ("FastSSO", "Enterprise identity", "An SSO integration broker connecting applications to customer SAML and OIDC identity providers."),
+            ("FastDevOps", "Deployment orchestration", "Provision, configure and deploy the Fast* fleet with Coolify-first operations and an optional Cloud Run path."),
+            ("FastLCA", "Building carbon assessment", "Whole-building life-cycle carbon assessment per EN 15978 as an inspectable FastHTML alternative to closed spreadsheets."),
         ],
     },
     {
@@ -64,7 +74,10 @@ GROUPS = [
             ("FastFund", "Family office", "Relationship management, portfolios, legal entities, filings and multijurisdiction tax intelligence."),
             ("FastVC", "Venture capital", "Thesis-led sourcing, founder signals, screening, round modelling, diligence, IC, LPs and portfolios."),
             ("FastPE", "Private equity", "Agentic workflows for deal sourcing, LBO underwriting, diligence, investment committee, LPs and portfolio operations."),
+            ("FastCRE", "Commercial real estate", "CRE deal workflows for underwriting, closing and managing investments with an AI deal squad."),
             ("FastFactoring", "Invoice finance", "Supplier onboarding, invoice verification, funding, servicing, collections, settlement and auto-invest rules."),
+            ("FastMSR", "Mortgage servicing rights", "MSR management with a simulated Freddie Mac Cash-Released XChange for servicing and transfer workflows."),
+            ("FastGrants", "Grants & EU funds", "Calls, applications, awards, disbursements, beneficiary reporting and an AI assistant across the grant lifecycle."),
         ],
     },
     {
@@ -74,6 +87,15 @@ GROUPS = [
         "products": [
             ("FastBooking", "Booking & commerce", "Multi-tenant bookings and commerce for sports facilities, restaurants, hotels, clinics and events."),
             ("FastClinic", "Clinic operations", "Multi-specialty clinic operations for appointments, availability, invoicing, recall, case mix and revenue."),
+            ("FastHealthData", "Health research data", "Research-data platform with project lifecycle, OMOP/FHIR cataloguing, access governance, pseudonymisation and cohort analytics."),
+        ],
+    },
+    {
+        "name": "Cities & infrastructure",
+        "filter": "cities",
+        "description": "Open platforms for civic IoT, telemetry and place-based operations.",
+        "products": [
+            ("FastCity", "Smart city IoT", "Device registry, telemetry, geo-dashboards, alarms, ingestion APIs and an AI assistant for city operations."),
         ],
     },
 ]
@@ -123,9 +145,14 @@ LIVE_DEMOS = {
     "FastDataGov": "https://datagov.fastsme.com",
     "FastSocial": "https://fastsocial.org",
     "FastFactoring": "https://fastfactoring.org",
+    "FastSurvey": "https://fastsurvey.org",
 }
 
 for product in PRODUCTS:
-    product["demo_url"] = LIVE_DEMOS[product["name"]]
+    demo_url = LIVE_DEMOS.get(product["name"])
+    if demo_url:
+        product["demo_url"] = demo_url
 
 FEATURED = ["FastFunnel", "FastERP", "FastFPA", "FastCRM", "FastBI", "FastClinic"]
+
+assert len(PRODUCTS) == 46, len(PRODUCTS)
