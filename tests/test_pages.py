@@ -62,7 +62,7 @@ def test_route(server, path, slug, expected):
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page(viewport={"width": 1440, "height": 900})
-        page.goto(server + path, wait_until="networkidle")
+        page.goto(server + path, wait_until="domcontentloaded")
         assert expected.lower() in page.locator("h1").first.inner_text().lower()
         assert page.get_by_text("Powered by Predictive Labs Ltd", exact=True).count() == 1
         page.screenshot(path=str(OUTPUT / f"{slug}.png"), full_page=True)
@@ -73,7 +73,7 @@ def test_mobile_navigation(server):
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page(viewport={"width": 390, "height": 844})
-        page.goto(server, wait_until="networkidle")
+        page.goto(server, wait_until="domcontentloaded")
         page.get_by_role("button", name="Toggle navigation").click()
         assert page.locator("#mobile-nav").is_visible()
         page.screenshot(path=str(OUTPUT / "home-mobile-nav.png"), full_page=True)
@@ -84,7 +84,7 @@ def test_language_dropdown_preserves_route_and_session(server):
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page(viewport={"width": 1440, "height": 900})
-        page.goto(server + "/products", wait_until="networkidle")
+        page.goto(server + "/products", wait_until="domcontentloaded")
         trigger = page.locator("#language-menu-button")
         trigger.click()
         menu = page.locator("#language-menu")
@@ -95,7 +95,7 @@ def test_language_dropdown_preserves_route_and_session(server):
         page.wait_for_url("**/products")
         assert page.locator("html").get_attribute("lang") == "et"
         assert "Tööriistad" in page.locator("h1").inner_text()
-        page.goto(server + "/team", wait_until="networkidle")
+        page.goto(server + "/team", wait_until="domcontentloaded")
         assert page.locator("html").get_attribute("lang") == "et"
         trigger = page.locator("#language-menu-button")
         trigger.click()
@@ -111,7 +111,7 @@ def test_every_supported_language_renders_translated_products(server):
         for lang in ("en", "et", "de", "fr", "sv", "lv", "no", "da", "pl", "nl", "fi", "lt"):
             context = browser.new_context(locale="en-GB")
             page = context.new_page()
-            page.goto(server + f"/set-lang/{lang}?next=/products", wait_until="networkidle")
+            page.goto(server + f"/set-lang/{lang}?next=/products", wait_until="domcontentloaded")
             assert page.url.endswith("/products")
             assert page.locator("html").get_attribute("lang") == lang
             assert page.locator("#language-menu [role=menuitem]").count() == 12
@@ -123,10 +123,10 @@ def test_language_return_path_rejects_external_redirects(server):
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page()
-        page.goto(server + "/set-lang/de?next=https://example.com", wait_until="networkidle")
+        page.goto(server + "/set-lang/de?next=https://example.com", wait_until="domcontentloaded")
         assert page.url == server + "/"
         assert page.locator("html").get_attribute("lang") == "de"
-        page.goto(server + "/set-lang/fr?next=/%255cexample.com", wait_until="networkidle")
+        page.goto(server + "/set-lang/fr?next=/%255cexample.com", wait_until="domcontentloaded")
         assert page.url == server + "/"
         browser.close()
 
@@ -135,7 +135,7 @@ def test_language_and_sign_in_controls_fit_mobile_header(server):
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page(viewport={"width": 320, "height": 844})
-        page.goto(server + "/set-lang/fr?next=/", wait_until="networkidle")
+        page.goto(server + "/set-lang/fr?next=/", wait_until="domcontentloaded")
         language = page.locator("#language-menu-button")
         sign_in = page.get_by_role("link", name="Se connecter", exact=True)
         assert language.is_visible()
@@ -150,7 +150,7 @@ def test_partners_follow_clients_and_link_to_profiles(server):
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page(viewport={"width": 1440, "height": 900})
-        page.goto(server + "/partners", wait_until="networkidle")
+        page.goto(server + "/partners", wait_until="domcontentloaded")
         nav_labels = page.locator("nav ul").first.locator("a").all_inner_texts()
         assert nav_labels[nav_labels.index("Clients") + 1] == "Partners"
         cards = page.locator("main article")
@@ -170,7 +170,7 @@ def test_product_catalogue_starts_with_fastoffice(server):
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page(viewport={"width": 1440, "height": 900})
-        page.goto(server + "/products", wait_until="networkidle")
+        page.goto(server + "/products", wait_until="domcontentloaded")
         cards = page.locator("article")
         assert cards.first.locator("h3").inner_text() == "FastOffice"
         assert cards.count() == 47
@@ -201,7 +201,7 @@ def test_product_filters_and_search(server):
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page(viewport={"width": 1440, "height": 900})
-        page.goto(server + "/products", wait_until="networkidle")
+        page.goto(server + "/products", wait_until="domcontentloaded")
         cards = page.locator("article.product-card")
         page.get_by_role("button", name="Finance & investment").click()
         assert page.locator("#product-result-count").inner_text() == "7"
@@ -221,7 +221,7 @@ def test_product_filters_fit_mobile_without_page_overflow(server):
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page(viewport={"width": 390, "height": 844})
-        page.goto(server + "/products", wait_until="networkidle")
+        page.goto(server + "/products", wait_until="domcontentloaded")
         assert page.evaluate("document.documentElement.scrollWidth") == 390
         page.get_by_role("button", name="Booking & care").click()
         assert page.locator("#product-result-count").inner_text() == "3"
@@ -234,7 +234,7 @@ def test_advisory_board_includes_selahaddin_karatas(server):
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page(viewport={"width": 1440, "height": 900})
-        page.goto(server + "/team", wait_until="networkidle")
+        page.goto(server + "/team", wait_until="domcontentloaded")
         card = page.locator("article").filter(has_text="Selahaddin Karatas")
         assert card.get_by_role("link", name="LinkedIn").get_attribute("href") == "https://www.linkedin.com/in/sekarsf/"
         assert card.get_by_role("link", name="Website").get_attribute("href") == "https://saaspass.com"
