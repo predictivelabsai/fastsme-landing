@@ -63,6 +63,7 @@ GROUPS = [
         "description": "Turn business data and knowledge into better decisions and skills.",
         "products": [
             ("FastBI", "Business intelligence", "Saved queries, Plotly dashboards, SQL and Cypher labs, and conversational text-to-SQL and text-to-Cypher."),
+            ("FastComps", "Competitive intelligence", "Track competitors, offerings, published prices and collection coverage across EEA markets with every claim linked to retained source evidence."),
             ("FastLMS", "Learning management", "Courses, quizzes, progress tracking, discussions, AI tutoring, XP, streaks, badges and leaderboards."),
         ],
     },
@@ -116,6 +117,7 @@ PRODUCTS = [
 LIVE_DEMOS = {
     "FastFunnel": "https://funnel.fastsme.com",
     "FastClinic": "https://clinic.fastsme.com",
+    "FastComps": "https://comps.fastsme.com",
     "FastCMS": "https://cms.fastsme.com",
     "FastCRM": "https://crm.fastsme.com",
     "FastDocs": "https://docs.fastsme.com",
@@ -155,4 +157,4 @@ for product in PRODUCTS:
 
 FEATURED = ["FastFunnel", "FastERP", "FastFPA", "FastCRM", "FastBI", "FastClinic"]
 
-assert len(PRODUCTS) == 46, len(PRODUCTS)
+assert len(PRODUCTS) == 47, len(PRODUCTS)
